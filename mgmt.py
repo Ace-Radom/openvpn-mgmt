@@ -1,17 +1,26 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import argparse
 import csv
 import datetime
 import os
 import subprocess
+import sys
 
+from mgmt import ovpn_script
 from mgmt import settings
 from mgmt import utils
 
 localtz_name = datetime.datetime.now().astimezone().tzname()
-script_dir = os.path.split( os.path.realpath( __file__ ) )[0]
+base_dir = os.path.split( os.path.realpath( __file__ ) )[0]
 server_uptime = ""
+parser = argparse.ArgumentParser()
+
+def setup_args():
+    features_arg_group = parser.add_mutually_exclusive_group( required = True )
+    features_arg_group.add_argument( "--refresh-cfg-cache" , default = False , action = "store_true" , help = "Refresh OpenVPN service config & openvpn-mgmt config cache" )
+    features_arg_group.add_argument( "--install-ovpn-script" , nargs = '?' , const = "all" , type = str , help = "Install OpenVPN scripts to server directory" )
 
 def is_openvpn_server_running() -> bool:
     try:
@@ -41,7 +50,15 @@ def is_openvpn_server_running() -> bool:
     return False
 
 def main():
-    settings.parse_settings( os.path.join( script_dir , "mgmt.cfg" ) )
+    settings.parse_settings( os.path.join( base_dir , "mgmt.cfg" ) )
+        
+    if len( sys.argv ) > 1:
+        setup_args()
+        args = parser.parse_args()
+
+        if args.install_ovpn_script:
+            script_mgmt = ovpn_script.ovpn_script( base_dir )
+            exit( script_mgmt.install( args.install_ovpn_script ) )
 
     if not is_openvpn_server_running():
         exit( 1 )    
@@ -85,8 +102,8 @@ def main():
     detailed_connections_data = []
     detailed_connections_data.append( [
         "Common Name" ,
-        "Real Addr." ,
-        "Virtual Addr." ,
+        "Real IP Addr." ,
+        "Virtual IP Addr." ,
         "Uplink Traffic (B)" ,
         "Downlink Traffic (B)" ,
         "Connected Since" ,
@@ -99,8 +116,8 @@ def main():
         connected_profiles.append( log_rows[i][1] )
         detailed_connections_data.append( [
             log_rows[i][1] ,  # common name
-            log_rows[i][2] ,  # real addr
-            log_rows[i][3] ,  # virtual addr
+            log_rows[i][2] ,  # real ip addr
+            log_rows[i][3] ,  # virtual ip addr
             f"{ utils.conv_bytes_to_formel_str( int( log_rows[i][5] ) ) } ({ log_rows[i][5] })" ,  # uplink traffic
             f"{ utils.conv_bytes_to_formel_str( int( log_rows[i][6] ) ) } ({ log_rows[i][6] })" ,  # downlink traffic
             f"{ connected_since_time_str } { localtz_name }" ,  # connected since
