@@ -1,13 +1,14 @@
 #!/bin/bash
 
-script_dir=$(dirname $(readlink -f "$0"))
-server_cfg_dir=$(dirname "$script_dir")
-log_dir="$server_cfg_dir/log"
+log_dir="/var/openvpn-mgmt/log"
 
-mkdir -p "$log_dir"
+if [[ ! -d "$log_dir" ]]; then
+    mkdir -p "$log_dir"
+    chmod 777 "$log_dir"
+fi
 
-log_file="$log_dir/openvpn.0.log"
+log_file="$log_dir/openvpn-mgmt.0.log"
 
-echo "=== Service Start $(date '+%Y-%m-%d %H:%M:%S %Z') ===" > "$log_file"
+echo "=== Service Start $(date '+%Y-%m-%d %H:%M:%S.%N %Z' | cut -c1-26) ===" > "$log_file"
 
 exit 0
