@@ -6,7 +6,7 @@ cn=$common_name
 real_ip="$trusted_ip:$trusted_port"
 virtual_ip=$ifconfig_pool_remote_ip
 
-log_msg_header=$(printf "%-44s" "$(date '+%Y-%m-%d %H:%M:%S.%N %Z' | cut -c1-26) [openvpn]")
+log_msg_header=$(printf "%-39s" "$(date '+%Y-%m-%d %H:%M:%S.%N %Z' | cut -c1-26) [openvpn]")
 
 echo "$log_msg_header Authed client connection accepted. [CN='$cn', REAL_IP='$real_ip', VIRTUAL_IP='$virtual_ip']" >> "$current_log_file"
 
