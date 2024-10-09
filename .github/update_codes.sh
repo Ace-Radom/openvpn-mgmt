@@ -10,5 +10,3 @@ else
     git pull
     git submodule update --recursive
 fi
-
-logout

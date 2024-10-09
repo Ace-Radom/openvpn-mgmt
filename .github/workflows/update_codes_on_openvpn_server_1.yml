@@ -21,5 +21,11 @@ jobs:
           host: ${{ secrets.OPENVPN_SERVER_1_HOST }}
           username: ${{secrets.OPENVPN_SERVER_1_USERNAME}}
           password: ${{secrets.OPENVPN_SERVER_1_KEY}}
-          script: bash ${{github.workspace}}/.github/update_codes.sh ${{secrets.OPENVPN_SERVER_1_INSTALL_DIR}}
-
+          script: |
+            mkdir ${{secrets.OPENVPN_SERVER_1_INSTALL_DIR}}/.openvpn-mgmt.cache && cd ${{secrets.OPENVPN_SERVER_1_INSTALL_DIR}}/.openvpn-mgmt.cache
+            wget https://raw.githubusercontent.com/Ace-Radom/openvpn-mgmt/refs/heads/main/.github/update_codes.sh
+            bash update_codes.sh ${{secrets.OPENVPN_SERVER_1_INSTALL_DIR}}
+            cd ../
+            rm -rf ${{secrets.OPENVPN_SERVER_1_INSTALL_DIR}}/.openvpn-mgmt.cache
+            logout
+          script_stop: true
