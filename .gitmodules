@@ -1,0 +1,3 @@
+[submodule "third_party/openvpn-install"]
+	path = third_party/openvpn-install
+	url = https://github.com/Nyr/openvpn-install.git
