@@ -16,7 +16,7 @@ server_uptime = ""
 def is_openvpn_server_running() -> bool:
     try:
         result = subprocess.run(
-            [ "systemctl" , "status" , "openvpn-server@server.service" ] ,
+            [ "systemctl" , "status" , settings.settings["server"]["service_name"] ] ,
             stdout = subprocess.PIPE ,
             stderr = subprocess.PIPE ,
             text = True
@@ -43,7 +43,8 @@ def is_openvpn_server_running() -> bool:
 def main():
     settings.parse_settings( os.path.join( script_dir , "mgmt.cfg" ) )
 
-    
+    if not is_openvpn_server_running():
+        exit( 1 )    
     # check service status
 
     with open( "/run/openvpn-server/status-server.log" , 'r' , encoding = 'utf-8' ) as rFile:

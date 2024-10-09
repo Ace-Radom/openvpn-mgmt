@@ -5,6 +5,7 @@ settings = {
         "output_level": 1
     } ,
     "server": {
+        "service_name": "openvpn-server@server.service" ,
         "status_log": "/run/openvpn-server/status-server.log" ,
         "server_dir": "/etc/openvpn/server/" ,
         "server_cfg": "/etc/openvpn/server/server.conf" ,
@@ -25,6 +26,8 @@ def parse_settings( settings_path: str ):
             settings["base"]["output_level"] = int( parser["base"]["output_level"] )
     
     if parser.has_section( "server" ):
+        if parser.has_option( "server" , "service_name" ) and len( parser["server"]["service_name"] ) != 0:
+            settings["server"]["service_name"] = parser["server"]["service_name"]
         if parser.has_option( "server" , "status_log" ) and len( parser["server"]["status_log"] ) != 0:
             settings["server"]["status_log"] = parser["server"]["status_log"]
         if parser.has_option( "server" , "server_dir" ) and len( parser["server"]["server_dir"] ) != 0:

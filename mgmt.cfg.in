@@ -1,7 +1,9 @@
 [base]
 output_level=1
+parse_service_config=0
 
 [server]
+service_name=
 status_log=
 server_dir=
 server_cfg=
