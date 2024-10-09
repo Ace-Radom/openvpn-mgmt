@@ -1,0 +1,12 @@
+[base]
+output_level=1
+
+[server]
+status_log=
+server_dir=
+server_cfg=
+mgmt_interface_server=
+mgmt_interface_port=
+
+[blocked_users]
+users=
