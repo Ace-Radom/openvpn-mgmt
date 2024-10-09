@@ -27,5 +27,4 @@ jobs:
             bash update_codes.sh ${{secrets.OPENVPN_SERVER_1_INSTALL_DIR}}
             cd ../
             rm -rf ${{secrets.OPENVPN_SERVER_1_INSTALL_DIR}}/.openvpn-mgmt.cache
-            logout
           script_stop: true
