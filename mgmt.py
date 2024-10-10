@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 
+from mgmt import clients
 from mgmt import log
 from mgmt import ovpn_script
 from mgmt import settings
@@ -57,6 +58,11 @@ def main():
     if len( sys.argv ) > 1:
         setup_args()
         args = parser.parse_args()
+
+        if args.refresh_cfg_cache:
+            clients_mgmt = clients.clients()
+            clients_mgmt.refresh_clients_data()
+            exit( 0 )
 
         if args.install_ovpn_script:
             script_mgmt = ovpn_script.ovpn_script( base_dir )

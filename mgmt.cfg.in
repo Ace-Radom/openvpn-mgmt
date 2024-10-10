@@ -10,5 +10,6 @@ server_cfg=
 mgmt_interface_server=
 mgmt_interface_port=
 
-[blocked_users]
-users=
+[clients]
+admins=
+blocked_users=

@@ -12,8 +12,9 @@ settings = {
         "mgmt_interface_server": "127.0.0.1" ,
         "mgmt_interface_port": 5555
     } ,
-    "blocked_users": {
-        "users": []
+    "clients": {
+        "admins": [] ,
+        "blocked_users": []
     }
 }
 
@@ -39,10 +40,17 @@ def parse_settings( settings_path: str ):
         if parser.has_option( "server" , "mgmt_interface_port" ) and len( parser["server"]["mgmt_interface_port"] ) != 0 and parser["server"]["mgmt_interface_port"].isdigit():
             settings["server"]["mgmt_interface_port"] = int( parser["server"]["mgmt_interface_port"] )
 
-    if parser.has_section( "blocked_users" ):
-        if parser.has_option( "blocked_users" , "users" ) and len( parser["blocked_users"]["users"] ) != 0:
-            users_str = parser["blocked_users"]["users"]
-            settings["blocked_users"]["users"] = users_str.split( ',' )
+    if parser.has_section( "clients" ):
+        if parser.has_option( "clients" , "admins" ) and len( parser["clients"]["admins"] ) != 0:
+            admins_str = parser["clients"]["admins"]
+            settings["clients"]["admins"] = admins_str.split( ',' )
+            for admin in settings["clients"]["admins"]:
+                admin.strip()
+        if parser.has_option( "clients" , "blocked_users" ) and len( parser["clients"]["blocked_users"] ) != 0:
+            blocked_users_str = parser["clients"]["blocked_users"]
+            settings["clients"]["blocked_users"] = blocked_users_str.split( ',' )
+            for blocked_user in settings["clients"]["blocked_users"]:
+                blocked_user.strip()
 
 if __name__ == "__main__":
     print( "This is a module, should not be executed" )
