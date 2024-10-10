@@ -54,7 +54,7 @@ class ovpn_script:
                 utils.lprint( 2 , f" - { from_path } -> { to_path }: Failed ({ e })" )
                 continue
 
-            log.logger.write_log( self._loghost , f"Installed OpenVPN script. [type='{ script['script'] }', from='{ from_path }', to='{ to_path }']" )
+            log.logger.write_log( self._loghost , f"OpenVPN script installed. [type='{ script['script'] }', from='{ from_path }', to='{ to_path }']" )
             utils.lprint( 1 , f" - { from_path } -> { to_path }: Succeeded" )
             ovpn_cfg_setup_info += f" - { script['script'] } \"script/{ script['path'] }\"\n"
 
