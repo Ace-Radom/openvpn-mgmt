@@ -5,8 +5,6 @@ import os
 from mgmt import log
 from mgmt import settings
 
-# common name, vip, user group, blocked to,
-
 class clients:
     USER_ADMIN = 0
     USER_NORMAL = 1
@@ -24,7 +22,10 @@ class clients:
         
         if not os.path.isfile( self._client_data_file ):
             self.refresh_clients_data()
-        
+
+        if not os.path.isdir( "/var/openvpn-mgmt" ):
+            os.makedirs( "/var/openvpn-mgmt" )
+
         return
     
     def refresh_clients_data( self ):
@@ -63,7 +64,7 @@ class clients:
         if os.path.isfile( self._client_data_file ):
             with open( self._client_data_file , 'r' , encoding = 'utf-8' ) as rFile:
                 client_datas = json.load( rFile )
-       
+
         for client in detailed_valid_clients:
             if len( client_datas ) != 0 and any( client["common_name"] == client_data["common_name"] for client_data in client_datas ):
                 client_data = list( filter( lambda it : it["common_name"] == client["common_name"] , client_datas ) )
@@ -80,13 +81,15 @@ class clients:
                     "user_group": self.USER_NORMAL ,
                     "block_to": -1
                 }
-            
+
             if this_client_data["common_name"] in settings.settings["clients"]["admins"]:
                 this_client_data["user_group"] = self.USER_ADMIN
                 this_client_data["block_to"] = -1
             elif this_client_data["common_name"] in settings.settings["clients"]["blocked_users"]:
                 this_client_data["user_group"] = self.USER_BLOCKED
-                this_client_data["block_to"] = -1        
+                this_client_data["block_to"] = -1
+
+            new_client_datas.append( this_client_data )
 
         with open( self._client_data_file , 'w' , encoding = 'utf-8' ) as wFile:
             json.dump( new_client_datas , wFile )
