@@ -17,7 +17,7 @@ log_file="/var/openvpn-mgmt/log/openvpn-mgmt.0.log"
 if [[ -f "$log_file" ]]; then
     main_commit=$(git log -1 --pretty=format:%h)
     log_msg_header=$(printf "%-49s" "$(date '+%Y-%m-%d %H:%M:%S.%6N %Z' | awk '{print $1, $2, $3}') [gh_codeupdater]")
-    flock -x "$log_file" echo "$log_msgs_header openvpn-mgmt updated. [commit=$main_commit]" >> "$log_file"
+    flock -x "$log_file" echo "$log_msg_header openvpn-mgmt updated. [commit=$main_commit]" >> "$log_file"
 fi
 
 exit 0
