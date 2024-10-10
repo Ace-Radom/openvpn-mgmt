@@ -28,7 +28,7 @@ class log:
 
     def get_header( self , host: str ) -> str:
         datetime_now = datetime.datetime.now()
-        time_now_str = datetime_now.strftime( "%Y-%m-%d %H:%M:%S.%f" )[:-3] + self._tz
+        time_now_str = datetime_now.strftime( "%Y-%m-%d %H:%M:%S.%f" )[:-3] + " " + self._tz
         log_header = f"{ time_now_str } [{ host }]"
         return log_header.ljust( 49 )
     
