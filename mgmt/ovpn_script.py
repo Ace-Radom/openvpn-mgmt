@@ -2,12 +2,14 @@ import configparser
 import os
 import shutil
 
+from mgmt import log
 from mgmt import settings
 from mgmt import utils
 
 class ovpn_script:
     def __init__( self , base_dir: str ):
         self._script_dir = os.path.join( base_dir , "script" )
+        self._loghost = "ovpnscr"
 
         parser = configparser.ConfigParser()
         parser.read( os.path.join( self._script_dir , "script.cfg" ) )
@@ -44,12 +46,15 @@ class ovpn_script:
             to_path = os.path.join( script_install_dir , script["path"] )
             try:
                 shutil.copyfile( from_path , to_path )
+                os.chmod( to_path , 0o755 )
                 copied = True
                 # for not installing all situation: target has been found
             except Exception as e:
-                utils.lprint( 3 , f" - { from_path } -> { to_path }: Failed ({ e })" )
+                log.logger.write_log( self._loghost , f"Failed to install OpenVPN script. [type='{ script['script'] }', from='{ from_path }', to='{ to_path }', error='{ e }']" )
+                utils.lprint( 2 , f" - { from_path } -> { to_path }: Failed ({ e })" )
                 continue
 
+            log.logger.write_log( self._loghost , f"Installed OpenVPN script. [type='{ script['script'] }', from='{ from_path }', to='{ to_path }']" )
             utils.lprint( 1 , f" - { from_path } -> { to_path }: Succeeded" )
             ovpn_cfg_setup_info += f" - { script['script'] } \"script/{ script['path'] }\"\n"
 
@@ -61,4 +66,7 @@ class ovpn_script:
         ovpn_cfg_setup_info += "If you have already done this, you can ignore this message."
         utils.lprint( 1 , ovpn_cfg_setup_info )
         return 0
-        
+
+if __name__ == "__main__":
+    print( "This is a module, should not be executed" )
+    exit( 1 )

@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 
+from mgmt import log
 from mgmt import ovpn_script
 from mgmt import settings
 from mgmt import utils
@@ -50,6 +51,7 @@ def is_openvpn_server_running() -> bool:
     return False
 
 def main():
+    log.init_global_logger( localtz_name )
     settings.parse_settings( os.path.join( base_dir , "mgmt.cfg" ) )
         
     if len( sys.argv ) > 1:
