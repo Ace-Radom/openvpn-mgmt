@@ -20,9 +20,17 @@ server_uptime = ""
 parser = argparse.ArgumentParser()
 
 def setup_args():
-    features_arg_group = parser.add_mutually_exclusive_group( required = True )
+    features_arg_group = parser.add_mutually_exclusive_group()
     features_arg_group.add_argument( "--refresh-cfg-cache" , default = False , action = "store_true" , help = "Refresh OpenVPN service config & openvpn-mgmt config cache" )
-    features_arg_group.add_argument( "--install-ovpn-script" , nargs = '?' , const = "all" , type = str , help = "Install OpenVPN scripts to server directory" )
+    features_arg_group.add_argument( "--install-ovpn-script" , nargs = '?' , metavar = "SCRIPT_NAME" , const = "all" , type = str , help = "Install OpenVPN scripts to server directory" )
+    
+    clients_parser = parser.add_subparsers( dest = "clients" ).add_parser( "clients" , help = "Manage OpenVPN clients" )
+    clients_arg_group = clients_parser.add_mutually_exclusive_group()
+    clients_arg_group.add_argument( "--list" , default = False , action = "store_true" , help = "List all valid clients" )
+    clients_arg_group.add_argument( "--status" , default = False , action = "store_true" , help = "Show all valid clients' detailed status" )
+    clients_arg_group.add_argument( "--refresh" , default = False , action = "store_true" , help = "Refresh valid clients cached datas" )
+    clients_arg_group.add_argument( "--block" , nargs = 2 , metavar = tuple( [ "COMMON_NAME" , "BLOCK_TO" ] ) , type = str , help = "Block a specific client" )
+    clients_arg_group.add_argument( "--is-blocked" , metavar = "COMMON_NAME" , type = str , help = "Check is a specific client being blocked" )
 
 def is_openvpn_server_running() -> bool:
     try:
@@ -59,14 +67,16 @@ def main():
         setup_args()
         args = parser.parse_args()
 
-        if args.refresh_cfg_cache:
-            clients_mgmt = clients.clients()
-            clients_mgmt.refresh_clients_data()
-            exit( 0 )
-
         if args.install_ovpn_script:
             script_mgmt = ovpn_script.ovpn_script( base_dir )
             exit( script_mgmt.install( args.install_ovpn_script ) )
+
+        if args.clients:
+            clients_mgmt = clients.clients()
+            if args.refresh:
+                exit( clients_mgmt.refresh_client_data() )
+            elif args.is_blocked:
+                exit( clients_mgmt.is_client_blocked( args.clients.is_blocked ) )
 
     if not is_openvpn_server_running():
         exit( 1 )    
