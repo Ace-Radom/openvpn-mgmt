@@ -167,10 +167,11 @@ class clients:
 
         for client in self._client_data:
             if client["common_name"] == common_name:
-                client["block_to"] = datetime.datetime.timestamp( block_to )
+                block_to_ts = int( datetime.datetime.timestamp( block_to ) )
+                client["block_to"] = block_to_ts
                 self.write_client_data()
                 utils.lprint( 1 , f"Client \"{ common_name }\" has been blocked to { block_to.strftime( '%Y-%m-%d %H:%M:%S' ) } { datetime.datetime.now().astimezone().tzname() }." )
-                log.logger.write_log( self._loghost , f"Client blocked. [cn=\"{ common_name }\", block_to={ datetime.datetime.timestamp( block_to ) }]" )
+                log.logger.write_log( self._loghost , f"Client blocked. [cn=\"{ common_name }\", block_to={ block_to_ts }]" )
                 return 0
             
         utils.lprint( 2 , f"Client \"{ common_name }\" not found in cached client data. You may try refreshing cached client data first." )
