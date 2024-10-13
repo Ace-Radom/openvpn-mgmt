@@ -54,7 +54,9 @@ class ovpn_script:
                 with open( to_path , 'r+' , encoding = 'utf-8' ) as File:
                     content = File.read()
                     content = content.replace( "$OPENVPN_MGMT_MAIN_PATH" , os.path.join( self._base_dir , "mgmt.py" ) )
+                    File.seek( 0 )
                     File.write( content )
+                    File.truncate()
 
             except Exception as e:
                 log.logger.write_log( self._loghost , f"Failed to install OpenVPN script. [type='{ script['script'] }', from='{ from_path }', to='{ to_path }', error='{ e }']" )

@@ -10,8 +10,8 @@ virtual_ip=$ifconfig_pool_remote_ip
 log_msg_header=$(printf "%-49s" "$(date '+%Y-%m-%d %H:%M:%S.%6N %Z' | awk '{print $1, $2, $3}') [openvpn]")
 
 is_blocked_response=$(python3 $openvpn_mgmt_main_path clients --is-blocked $cn)
-read -r response <<< "$is_blocked_response"
-read -r msg <<< "$(echo "$is_blocked_response" | sed -n '2p')"
+response=$(echo "$is_blocked_response" | sed -n '1p')
+msg=$(echo "$is_blocked_response" | sed -n '2p')
 
 if [[ "$response" == "yes" ]]; then
     flock -x "$current_log_file" echo "$log_msg_header Client connection denied. [cn='$cn', real_ip='$real_ip', virtual_ip='$virtual_ip', mgmt_msg='$msg']" >> "$current_log_file"
