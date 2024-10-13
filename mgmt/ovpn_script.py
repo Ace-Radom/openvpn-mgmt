@@ -8,6 +8,7 @@ from mgmt import utils
 
 class ovpn_script:
     def __init__( self , base_dir: str ):
+        self._base_dir = base_dir
         self._script_dir = os.path.join( base_dir , "script" )
         self._loghost = "ovpnscr"
 
@@ -49,6 +50,12 @@ class ovpn_script:
                 os.chmod( to_path , 0o755 )
                 copied = True
                 # for not installing all situation: target has been found
+
+                with open( to_path , 'r+' , encoding = 'utf-8' ) as File:
+                    content = File.read()
+                    content = content.replace( "$OPENVPN_MGMT_MAIN_PATH" , os.path.join( self._base_dir , "mgmt.py" ) )
+                    File.write( content )
+
             except Exception as e:
                 log.logger.write_log( self._loghost , f"Failed to install OpenVPN script. [type='{ script['script'] }', from='{ from_path }', to='{ to_path }', error='{ e }']" )
                 utils.lprint( 2 , f" - { from_path } -> { to_path }: Failed ({ e })" )
