@@ -19,16 +19,12 @@ class clients:
         self._client_data_file = "/var/openvpn-mgmt/clients.json"
         self._client_data = []
         self._loghost = "clients"
-        if not os.path.isfile( self._client_certs_list_file ):
-            raise Exception( f"Valid clients list file missing: \"{ self._client_ipp_file }\"" )
-        if not os.path.isfile( self._client_ipp_file ):
-            raise Exception( f"Valid clients ipp file missing: \"{ self._client_ipp_file }\"" )
         
-        if not os.path.isfile( self._client_data_file ):
-            self.refresh_client_data()
-
         if not os.path.isdir( "/var/openvpn-mgmt" ):
             os.makedirs( "/var/openvpn-mgmt" )
+
+        if not os.path.isfile( self._client_data_file ):
+            self.refresh_client_data()
 
         return
     
@@ -50,6 +46,12 @@ class clients:
 
     def refresh_client_data( self ) -> int:
         log.logger.write_log( self._loghost , "Refreshing clients data..." )
+
+        if not os.path.isfile( self._client_certs_list_file ):
+            raise Exception( f"Valid clients list file missing: \"{ self._client_certs_list_file }\"" )
+        
+        if not os.path.isfile( self._client_ipp_file ):
+            raise Exception( f"Valid clients ipp file missing: \"{ self._client_ipp_file }\"" )
 
         with open( self._client_certs_list_file , 'r' , encoding = 'utf-8' ) as rFile:
             cert_index_lines = rFile.readlines()[1:]
