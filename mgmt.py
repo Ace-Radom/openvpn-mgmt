@@ -75,11 +75,13 @@ def main():
             clients_mgmt = clients.clients()
             if args.refresh:
                 exit( clients_mgmt.refresh_client_data() )
+            elif args.block:
+                exit( clients_mgmt.block_client( args.block[0] , args.block[1] ) )
             elif args.is_blocked:
-                exit( clients_mgmt.is_client_blocked( args.clients.is_blocked ) )
+                exit( clients_mgmt.is_client_blocked( args.is_blocked ) )
 
     if not is_openvpn_server_running():
-        exit( 1 )    
+        exit( 1 )
     # check service status
 
     with open( "/run/openvpn-server/status-server.log" , 'r' , encoding = 'utf-8' ) as rFile:

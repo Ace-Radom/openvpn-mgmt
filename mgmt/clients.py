@@ -2,6 +2,7 @@ import csv
 import datetime
 import json
 import os
+import re
 
 from mgmt import log
 from mgmt import settings
@@ -33,12 +34,15 @@ class clients:
     
     def read_client_data( self ):
         with open( self._client_data_file , 'r' , encoding = 'utf-8' ) as rFile:
-            self._client_data = json.load( rFile )
+            try:
+                self._client_data = json.load( rFile )
+            except:
+                self._client_data = []
         return
     
     def write_client_data( self ):
-        with open( self._client_data_file , 'w' , encodint = 'utf-8' ) as wFile:
-            json.dump( wFile )
+        with open( self._client_data_file , 'w' , encoding = 'utf-8' ) as wFile:
+            json.dump( self._client_data , wFile )
         return
 
     def refresh_client_data( self ) -> int:
@@ -131,14 +135,42 @@ class clients:
         self.write_client_data()
         return 0
     
-    def block_client( self , common_name: str , block_to: int ) -> int:
+    def block_client( self , common_name: str , block_time_length_str: str ) -> int:
         self.read_client_data()
+
+        pattern = r"(?:(\d+)mo)?(?:(\d+)d)?(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?"
+        match = re.fullmatch( pattern , block_time_length_str )
+        if not match:
+            utils.lprint( 2 , "Invalid block time input." )
+            return 1
+        
+        months = int( match.group( 1 ) or 0 )
+        days = int( match.group( 2 ) or 0 )
+        hours = int( match.group( 3 ) or 0 )
+        minutes = int( match.group( 4 ) or 0 )
+        seconds = int( match.group( 5 ) or 0 )
+        block_to = datetime.datetime.now()
+        if months:
+            for _ in range( 0 , months ):
+                month = block_to.month + 1
+                year = block_to.year
+                if month > 12:
+                    month = 1
+                    year += 1
+                block_to = block_to.replace( year = year , month = month )
+        block_to += datetime.timedelta(
+            days = days ,
+            hours = hours ,
+            minutes = minutes ,
+            seconds = seconds
+        )
+
         for client in self._client_data:
             if client["common_name"] == common_name:
-                client["block_to"] = block_to
+                client["block_to"] = datetime.datetime.timestamp( block_to )
                 self.write_client_data()
-                utils.lprint( 1 , f"Client \"{ common_name }\" has been blocked to { datetime.datetime.fromtimestamp( block_to ).strftime( '%Y-%m-%d %H:%M:%S' ) } { datetime.datetime.now().astimezone().tzname() }." )
-                log.logger.write_log( self._loghost , f"Client blocked. [cn=\"{ common_name }\", block_to={ block_to }]" )
+                utils.lprint( 1 , f"Client \"{ common_name }\" has been blocked to { block_to.strftime( '%Y-%m-%d %H:%M:%S' ) } { datetime.datetime.now().astimezone().tzname() }." )
+                log.logger.write_log( self._loghost , f"Client blocked. [cn=\"{ common_name }\", block_to={ datetime.datetime.timestamp( block_to ) }]" )
                 return 0
             
         utils.lprint( 2 , f"Client \"{ common_name }\" not found in cached client data. You may try refreshing cached client data first." )
