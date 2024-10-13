@@ -32,7 +32,10 @@ class clients:
 
         return
     
-    def read_client_data( self ):
+    def read_client_data( self ) -> list:
+        if not os.path.isfile( self._client_data_file ):
+            return []
+
         with open( self._client_data_file , 'r' , encoding = 'utf-8' ) as rFile:
             try:
                 self._client_data = json.load( rFile )
