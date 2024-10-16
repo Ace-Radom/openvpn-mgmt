@@ -139,6 +139,31 @@ class clients:
 
         self.write_client_data()
         return 0
+
+    def list_client( self ) -> int:
+        self.read_client_data()
+
+        if len( self._client_data ) == 0:
+            utils.lprint( 2 , "Clients data empty, run \"clients --refresh\" first to refresh cached clients data." )
+            return 1
+        
+        clients_list = []
+        clients_list.append( [
+            "Common Name" ,
+            "Virtual IP" ,
+            "User Group"
+        ] )
+
+        for client in self._client_data:
+            clients_list.append( [ client["common_name"] , client["virtual_ip"] , { 0: "Admin" , 1: "Normal User" , -1: "Blocked User" }.get( client["user_group"] , "Unknown" ) ] )
+
+        utils.lprint( 1 , f"Current clients count: { len( self._client_data ) }" )
+
+        col_widths = [max( len( str( item ) ) for item in col ) for col in zip( *clients_list )]
+        for row in clients_list:
+            utils.lprint( 1 , " | ".join( f"{ item.ljust( col_widths[i] ) }" for i , item in enumerate( row ) ) )
+
+        return 0
     
     def block_client( self , common_name: str , block_time_length_str: str ) -> int:
         self.read_client_data()

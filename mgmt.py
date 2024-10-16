@@ -75,6 +75,8 @@ def main():
             clients_mgmt = clients.clients()
             if args.refresh:
                 exit( clients_mgmt.refresh_client_data() )
+            elif args.list:
+                exit( clients_mgmt.list_client() )
             elif args.block:
                 exit( clients_mgmt.block_client( args.block[0] , args.block[1] ) )
             elif args.is_blocked:
