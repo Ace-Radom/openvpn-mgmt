@@ -9,8 +9,9 @@ settings = {
         "status_log": "/run/openvpn-server/status-server.log" ,
         "server_dir": "/etc/openvpn/server/" ,
         "server_cfg": "/etc/openvpn/server/server.conf" ,
-        "mgmt_interface_server": "127.0.0.1" ,
-        "mgmt_interface_port": 5555
+        "mgmt_interface_server": None ,
+        "mgmt_interface_port": None ,
+        "mgmt_interface_pswd": None
     } ,
     "clients": {
         "admins": [] ,

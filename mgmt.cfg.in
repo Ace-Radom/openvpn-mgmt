@@ -9,6 +9,7 @@ server_dir=
 server_cfg=
 mgmt_interface_server=
 mgmt_interface_port=
+mgmt_interface_pswd=
 
 [clients]
 admins=
