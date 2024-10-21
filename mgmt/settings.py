@@ -40,6 +40,8 @@ def parse_settings( settings_path: str ):
             settings["server"]["mgmt_interface_server"] = parser["server"]["mgmt_interface_server"]
         if parser.has_option( "server" , "mgmt_interface_port" ) and len( parser["server"]["mgmt_interface_port"] ) != 0 and parser["server"]["mgmt_interface_port"].isdigit():
             settings["server"]["mgmt_interface_port"] = int( parser["server"]["mgmt_interface_port"] )
+        if parser.has_option( "server" , "mgmt_interface_pswd" ) and len( parser["server"]["mgmt_interface_pswd"] ) != 0:
+            settings["server"]["mgmt_interface_pswd"] = parser["server"]["mgmt_interface_pswd"]
 
     if parser.has_section( "clients" ):
         if parser.has_option( "clients" , "admins" ) and len( parser["clients"]["admins"] ) != 0:
