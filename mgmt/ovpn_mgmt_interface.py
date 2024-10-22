@@ -25,18 +25,22 @@ class ovpn_mgmt_interface:
             response = self._sock.recv( 1024 ).decode( 'utf-8' )
             if "ENTER PASSWORD" in response:
                 if settings.settings["server"]["mgmt_interface_pswd"] is None:
+                    self._sock.close()
                     raise Exception( "Connecting to OpenVPN management interface with password protected but password is not provided in settings" )
                 
                 self._sock.sendall( f"{ settings.settings['server']['mgmt_interface_pswd'] }\n".encode( 'utf-8' ) )
                 response = self._sock.recv( 1024 ).decode( 'utf-8' )
                 if "SUCCESS" not in response:
+                    self._sock.close()
                     raise Exception( "Authentication failed" )
                 
                 if ">INFO:OpenVPN Management Interface" not in response:
+                    self._sock.close()
                     raise Exception( "Connection failed" )
 
             else:
                 if ">INFO:OpenVPN Management Interface" not in response:
+                    self._sock.close()
                     raise Exception( "Connection failed" )
                 
             log.logger.write_log( self._loghost , "Connected to OpenVPN management interface" )
