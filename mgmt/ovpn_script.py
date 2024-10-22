@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
 import configparser
 import os
 import shutil
