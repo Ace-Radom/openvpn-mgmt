@@ -14,7 +14,7 @@ from mgmt import ovpn_script
 from mgmt import settings
 from mgmt import utils
 
-localtz_name = datetime.datetime.now().astimezone().tzname()
+localtz_name = utils.get_tzname()
 base_dir = os.path.split( os.path.realpath( __file__ ) )[0]
 server_uptime = ""
 parser = argparse.ArgumentParser()

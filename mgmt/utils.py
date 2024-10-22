@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import datetime
+
 from mgmt import settings
 
 def conv_bytes_to_formel_str( bytes_count: int ) -> str:
@@ -16,6 +18,9 @@ def conv_bytes_to_formel_str( bytes_count: int ) -> str:
 def lprint( level: int , *args , **kwargs ):
     if level >= settings.settings["base"]["output_level"]:
         print( *args , **kwargs )
+
+def get_tzname() -> str:
+    return datetime.datetime.now().astimezone().tzname()
 
 if __name__ == "__main__":
     print( "This is a module, should not be executed" )

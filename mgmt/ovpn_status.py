@@ -16,6 +16,13 @@ class ovpn_status:
 
         self.version = log_rows[0][1]
         self.last_log_refresh_datetime = datetime.datetime.fromtimestamp( int( log_rows[1][2] ) )
+
+        log_rows.pop( 0 )
+        log_rows.pop( 0 )
+        log_rows.pop( -1 )
+        log_rows.pop( -1 )
+        # pop datas: server version; last refresh time; global stats; END sign
+
         self.connection_count = ( len( log_rows ) - 2 ) // 2
         self.detailed_connection_data = []
 

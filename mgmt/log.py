@@ -5,8 +5,8 @@ import os
 from mgmt import utils
 
 class log:
-    def __init__( self , tz: str ):
-        self._tz = tz
+    def __init__( self ):
+        self._tz = utils.get_tzname()
 
     def write_log( self , host: str , msg: str ):
         log_msg = f"{ self.get_header( host ) } { msg }\n"
@@ -34,9 +34,9 @@ class log:
     
 logger: log = None
     
-def init_global_logger( tz: str ):
+def init_global_logger():
     global logger
-    logger = log( tz )
+    logger = log()
 
 if __name__ == "__main__":
     print( "This is a module, should not be executed" )

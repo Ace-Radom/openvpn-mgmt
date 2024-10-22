@@ -222,8 +222,9 @@ class clients:
                         if status.is_connected( client["common_name"] ):
                             connected_client_data = list( filter( lambda it : it["common_name"] == client["common_name"] , status.detailed_connection_data ) )
                             assert len( connected_client_data ) == 1
+                            client_connected_since_time_str = datetime.datetime.fromtimestamp( connected_client_data[0]['connected_since'] ).strftime( "%Y-%m-%d %H:%M:%S" )
                             client_status = "Connected"
-                            client_addi_info = f"Connected since: { connected_client_data["connected_since"] }"
+                            client_addi_info = f"Connected since: { client_connected_since_time_str } { utils.get_tzname() }"
                             # client connected
                         else:
                             client_status = "Disconnected"
@@ -241,6 +242,13 @@ class clients:
                 client_status ,
                 client_addi_info
             ] )
+
+        last_log_refresh_time_str = status.last_log_refresh_datetime.strftime( "%Y-%m-%d %H:%M:%S" )
+        last_log_refresh_time_delta_str = f"{ ( datetime.datetime.now() - status.last_log_refresh_datetime ).total_seconds() :.0f}"
+
+        utils.lprint( 1 , f"Current clients count: { len( self._client_data ) }" )
+        utils.lprint( 1 , f"Last log refresh: { last_log_refresh_time_str } { utils.get_tzname() } ({ last_log_refresh_time_delta_str } seconds ago)" )
+        utils.lprint( 1 , f"Current connected clients count: { status.connection_count }" )
 
         col_widths = [max( len( str( item ) ) for item in col ) for col in zip( *clients_list )]
         for row in clients_list:
