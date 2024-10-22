@@ -109,6 +109,8 @@ class clients:
             elif this_client_data["common_name"] in settings.settings["clients"]["blocked_users"]:
                 this_client_data["user_group"] = self.USER_BLOCKED
                 this_client_data["block_to"] = -1
+            else:
+                this_client_data["user_group"] = self.USER_NORMAL
 
             new_client_data.append( this_client_data )
 
