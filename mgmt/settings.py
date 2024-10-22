@@ -2,7 +2,8 @@ import configparser
 
 settings = {
     "base": {
-        "output_level": 1
+        "output_level": 1 ,
+        "use_mgmt_interface_as_default": False
     } ,
     "server": {
         "service_name": "openvpn-server@server.service" ,
@@ -26,6 +27,8 @@ def parse_settings( settings_path: str ):
     if parser.has_section( "base" ):
         if parser.has_option( "base" , "output_level" ) and len( parser["base"]["output_level"] ) != 0 and parser["base"]["output_level"].isdigit():
             settings["base"]["output_level"] = int( parser["base"]["output_level"] )
+        if parser.has_option( "base" , "use_mgmt_interface_as_default" ) and len( parser["base"]["use_mgmt_interface_as_default"] ) != 0 and parser["base"]["use_mgmt_interface_as_default"].isdigit():
+            settings["base"]["use_mgmt_interface_as_default"] = ( int( parser["base"]["use_mgmt_interface_as_default"] ) != 0 )
     
     if parser.has_section( "server" ):
         if parser.has_option( "server" , "service_name" ) and len( parser["server"]["service_name"] ) != 0:

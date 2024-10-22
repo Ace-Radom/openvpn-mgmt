@@ -5,6 +5,8 @@ import os
 import re
 
 from mgmt import log
+from mgmt import ovpn_mgmt_interface
+from mgmt import ovpn_status
 from mgmt import settings
 from mgmt import utils
 
@@ -155,9 +157,90 @@ class clients:
         ] )
 
         for client in self._client_data:
-            clients_list.append( [ client["common_name"] , client["virtual_ip"] , { 0: "Admin" , 1: "Normal User" , -1: "Blocked User" }.get( client["user_group"] , "Unknown" ) ] )
+            clients_list.append( [
+                client["common_name"] ,
+                client["virtual_ip"] ,
+                { clients.USER_ADMIN: "Admin" , clients.USER_NORMAL: "Normal User" , clients.USER_BLOCKED: "Blocked User" }.get( client["user_group"] , "Unknown" )
+            ] )
 
         utils.lprint( 1 , f"Current clients count: { len( self._client_data ) }" )
+
+        col_widths = [max( len( str( item ) ) for item in col ) for col in zip( *clients_list )]
+        for row in clients_list:
+            utils.lprint( 1 , " | ".join( f"{ item.ljust( col_widths[i] ) }" for i , item in enumerate( row ) ) )
+
+        return 0
+
+    def list_client_status( self ) -> int:
+        self.read_client_data()
+
+        if len( self._client_data ) == 0:
+            utils.lprint( 2 , "Clients data empty, run \"clients --refresh\" first to refresh cached clients data." )
+            return 1
+        
+        ret = 0
+        status_log = ""
+        if settings.settings["base"]["use_mgmt_interface_as_default"]:
+            mgmt_interface = ovpn_mgmt_interface.ovpn_mgmt_interface()
+            ret = mgmt_interface.connect()
+            if ret == 0:
+                ret , status_log = mgmt_interface.exec( "status" )
+                if ret != 0:
+                    log.logger.write_log( self._loghost , "Get service status log from OpenVPN management interface failed, use status log file instead." )
+                mgmt_interface.close()
+            else:
+                log.logger.write_log( self._loghost , "Get service status log from OpenVPN management interface failed, use status log file instead." )
+
+        if ret != 0 or status_log == "":
+            with open( settings.settings["server"]["status_log"] , 'r' , encoding = 'utf-8' ) as rFile:
+                status_log = rFile.read()
+
+        status = ovpn_status.ovpn_status()
+        status.parse_status_log( status_log )
+
+        clients_list = []
+        clients_list.append( [
+            "Common Name" ,
+            "Virtual IP" ,
+            "User Group" ,
+            "Status" ,
+            "Additional Info"
+        ] )
+
+        for client in self._client_data:
+            if client["user_group"] == clients.USER_BLOCKED:
+                client_status = "Blocked"
+                client_addi_info = ""
+            else:
+                ret , tag , msg = self._is_client_blocked( client["common_name"] )
+                if ret == 0:
+                    if tag == "yes":
+                        client_status = "Blocked"
+                        client_addi_info = msg
+                        # normal user being blocked
+                    else:
+                        if status.is_connected( client["common_name"] ):
+                            connected_client_data = list( filter( lambda it : it["common_name"] == client["common_name"] , status.detailed_connection_data ) )
+                            assert len( connected_client_data ) == 1
+                            client_status = "Connected"
+                            client_addi_info = f"Connected since: { connected_client_data["connected_since"] }"
+                            # client connected
+                        else:
+                            client_status = "Disconnected"
+                            client_addi_info = ""
+                            # client disconnected
+                else:
+                    client_status = "Unknown"
+                    client_addi_info = msg
+                    # check is client blocked failed
+
+            clients_list.append( [
+                client["common_name"] ,
+                client["virtual_ip"] ,
+                { clients.USER_ADMIN: "Admin" , clients.USER_NORMAL: "Normal User" , clients.USER_BLOCKED: "Blocked User" }.get( client["user_group"] , "Unknown" ) ,
+                client_status ,
+                client_addi_info
+            ] )
 
         col_widths = [max( len( str( item ) ) for item in col ) for col in zip( *clients_list )]
         for row in clients_list:
@@ -200,49 +283,42 @@ class clients:
                 block_to_ts = int( datetime.datetime.timestamp( block_to ) )
                 client["block_to"] = block_to_ts
                 self.write_client_data()
-                utils.lprint( 1 , f"Client \"{ common_name }\" has been blocked to { block_to.strftime( '%Y-%m-%d %H:%M:%S' ) } { datetime.datetime.now().astimezone().tzname() }." )
-                log.logger.write_log( self._loghost , f"Client blocked. [cn=\"{ common_name }\", block_to={ block_to_ts }]" )
+                utils.lprint( 1 , f"Client '{ common_name }' has been blocked to { block_to.strftime( '%Y-%m-%d %H:%M:%S' ) } { datetime.datetime.now().astimezone().tzname() }." )
+                log.logger.write_log( self._loghost , f"Client blocked. [cn='{ common_name }', block_to={ block_to_ts }]" )
                 return 0
             
         utils.lprint( 2 , f"Client \"{ common_name }\" not found in cached client data. You may try refreshing cached client data first." )
         return 1
 
-    def is_client_blocked( self , common_name: str ) -> int:
+    def _is_client_blocked( self , common_name: str ) -> tuple[int,str,str]:
         # this function uses print, not utils.lprint, since it would be called by OpenVPN scripts
         self.refresh_client_block_to()
         # here: refresh_client_block_to already updated self._client_data, no need to read from file again
         client_data = list( filter( lambda it : it["common_name"] == common_name , self._client_data ) )
         if len( client_data ) == 0:
-            print( "error" )
-            print( f"Client \"{ common_name }\" not found in cached client data." )
-            return 1
+            return ( 1 , "error" , f"Client \"{ common_name }\" not found in cached client data." )
         
         if client_data[0]["user_group"] == self.USER_ADMIN:
-            print( "no" )
-            print( f"Client \"{ common_name }\" is in admin user group." )
-            return 0
+            return ( 0 , "no" , f"Client \"{ common_name }\" is in admin user group." )
         elif client_data[0]["user_group"] == self.USER_BLOCKED:
-            print( "yes" )
-            print( f"Client \"{ common_name }\" is in blocked user group." )
-            return 0
+            return ( 0 , "yes" , f"Client \"{ common_name }\" is in blocked user group." )
         elif client_data[0]["user_group"] == self.USER_NORMAL:
             block_to = client_data[0]["block_to"]
             if block_to == -1:
-                print( "no" )
-                print( f"Client \"{ common_name }\" is not blocked." )
+                return ( 0 , "no" , f"Client \"{ common_name }\" is not blocked." )
             elif block_to == 0:
-                print( "yes" )
-                print( f"Client \"{ common_name }\" is indefinitely blocked." )
+                return ( 0 , "yes" , f"Client \"{ common_name }\" is indefinitely blocked." )
             else:
                 ts_now = datetime.datetime.timestamp( datetime.datetime.now() )
                 if ts_now < block_to:
-                    print( "yes" )
-                    print( f"Client \"{ common_name }\" is blocked to { datetime.datetime.fromtimestamp( block_to ).strftime( '%Y-%m-%d %H:%M:%S' ) } { datetime.datetime.now().astimezone().tzname() }." )
+                    return ( 0 , "yes" , f"Client \"{ common_name }\" is blocked to { datetime.datetime.fromtimestamp( block_to ).strftime( '%Y-%m-%d %H:%M:%S' ) } { datetime.datetime.now().astimezone().tzname() }." )
                 else:
-                    print( "no" )
-                    print( f"Client \"{ common_name }\" is no longer blocked." )
-            return 0
+                    return ( 0 , "no" , f"Client \"{ common_name }\" is no longer blocked." )
         else:
-            print( "error" )
-            print( "Unrecognized user group." )
-            return 1
+            return ( 1 , "error" , "Unrecognized user group." )
+
+    def is_client_blocked( self , common_name: str ) -> int:
+        ret , tag , msg = self._is_client_blocked( common_name )
+        print( tag )
+        print( msg )
+        return ret
