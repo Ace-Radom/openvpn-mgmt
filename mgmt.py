@@ -60,7 +60,7 @@ def is_openvpn_server_running() -> bool:
     return False
 
 def main():
-    log.init_global_logger( localtz_name )
+    log.init_global_logger()
     settings.parse_settings( os.path.join( base_dir , "mgmt.cfg" ) )
         
     if len( sys.argv ) > 1:
