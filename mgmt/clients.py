@@ -195,7 +195,7 @@ class clients:
                     log.logger.write_log( self._loghost , "Get service status log from OpenVPN management interface failed, use status log file instead." )
                 mgmt_interface.close()
             else:
-                log.logger.write_log( self._loghost , "Get service status log from OpenVPN management interface failed, use status log file instead." )
+                log.logger.write_log( self._loghost , "Connect to OpenVPN management interface failed, use status log file instead." )
 
         if ret != 0 or status_log == "":
             with open( settings.settings["server"]["status_log"] , 'r' , encoding = 'utf-8' ) as rFile:

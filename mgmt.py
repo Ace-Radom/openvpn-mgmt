@@ -37,6 +37,7 @@ def setup_args():
     connection_parser = subcommand_subparser.add_parser( "connection" , help = "Manage OpenVPN server connections" )
     connection_arg_group = connection_parser.add_mutually_exclusive_group()
     connection_arg_group.add_argument( "--mode" , nargs = '?' , metavar = "MODE" , const = "__get__" , type = str , help = "Get / Set OpenVPN server connection mode" )
+    connection_arg_group.add_argument( "--list" , default = False , action = "store_true" , help = "List all connection detailed datas" )
 
 def is_openvpn_server_running() -> bool:
     try:
@@ -110,8 +111,9 @@ def main():
                         else:
                             utils.lprint( 2 , f"Illegal OpenVPN server connection mode string: { args.mode }" )
                             exit( 1 )
-
                         exit( connection_mgmt.set_mode( mode ) )
+                elif args.list:
+                    exit( connection_mgmt.list_connection_datas() )
 
     if not is_openvpn_server_running():
         exit( 1 )
