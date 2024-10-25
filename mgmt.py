@@ -25,7 +25,8 @@ def setup_args():
     features_arg_group.add_argument( "--refresh-cfg-cache" , default = False , action = "store_true" , help = "Refresh OpenVPN service config & openvpn-mgmt config cache" )
     features_arg_group.add_argument( "--install-ovpn-script" , nargs = '?' , metavar = "SCRIPT_NAME" , const = "all" , type = str , help = "Install OpenVPN scripts to server directory" )
     
-    clients_parser = parser.add_subparsers( dest = "clients" ).add_parser( "clients" , help = "Manage OpenVPN clients" )
+    subcommand_subparser = parser.add_subparsers( dest = "subcommand" )
+    clients_parser = subcommand_subparser.add_parser( "clients" , help = "Manage OpenVPN clients" )
     clients_arg_group = clients_parser.add_mutually_exclusive_group()
     clients_arg_group.add_argument( "--list" , default = False , action = "store_true" , help = "List all valid clients" )
     clients_arg_group.add_argument( "--status" , default = False , action = "store_true" , help = "Show all valid clients' detailed status" )
@@ -33,9 +34,9 @@ def setup_args():
     clients_arg_group.add_argument( "--block" , nargs = 2 , metavar = tuple( [ "COMMON_NAME" , "BLOCK_TO" ] ) , type = str , help = "Block a specific client" )
     clients_arg_group.add_argument( "--is-blocked" , metavar = "COMMON_NAME" , type = str , help = "Check is a specific client being blocked" )
 
-    connection_parser = parser.add_subparsers( dest = "connection" ).add_parser( "connection" , help = "Manage OpenVPN server connections" )
+    connection_parser = subcommand_subparser.add_parser( "connection" , help = "Manage OpenVPN server connections" )
     connection_arg_group = connection_parser.add_mutually_exclusive_group()
-    connection_arg_group.add_argument( "--mode" , nargs = '?' , metavar = "MODE" , const = "" , type = str , help = "Get / Set OpenVPN server connection mode" )
+    connection_arg_group.add_argument( "--mode" , nargs = '?' , metavar = "MODE" , const = "__get__" , type = str , help = "Get / Set OpenVPN server connection mode" )
 
 def is_openvpn_server_running() -> bool:
     try:
@@ -76,40 +77,41 @@ def main():
             script_mgmt = ovpn_script.ovpn_script( base_dir )
             exit( script_mgmt.install( args.install_ovpn_script ) )
 
-        if args.clients:
-            clients_mgmt = clients.clients()
-            if args.refresh:
-                exit( clients_mgmt.refresh_client_data() )
-            elif args.list:
-                exit( clients_mgmt.list_client() )
-            elif args.status:
-                exit( clients_mgmt.list_client_status() )
-            elif args.block:
-                exit( clients_mgmt.block_client( args.block[0] , args.block[1] ) )
-            elif args.is_blocked:
-                exit( clients_mgmt.is_client_blocked( args.is_blocked ) )
+        if args.subcommand:
+            if args.subcommand == "clients":
+                clients_mgmt = clients.clients()
+                if args.refresh:
+                    exit( clients_mgmt.refresh_client_data() )
+                elif args.list:
+                    exit( clients_mgmt.list_client() )
+                elif args.status:
+                    exit( clients_mgmt.list_client_status() )
+                elif args.block:
+                    exit( clients_mgmt.block_client( args.block[0] , args.block[1] ) )
+                elif args.is_blocked:
+                    exit( clients_mgmt.is_client_blocked( args.is_blocked ) )
 
-        if args.connection:
-            connection_mgmt = connection.connection()
-            if args.mode:
-                if args.mode == "":
-                    mode_str = {
-                        connection.connection.CONNECTION_MODE_NORMAL: "normal" ,
-                        connection.connection.CONNECTION_MODE_MAINTAIN: "maintain" ,
-                        connection.connection.CONNECTION_MODE_BLOCK: "block"
-                    }.get( connection_mgmt.get_mode() , "unknown" )
-                    utils.lprint( 1 , f"Current OpenVPN server is in { mode_str } connection mode." )
-                    exit( 0 )
-                else:
-                    mode_str = args.mode.lower()
-                    if mode_str == "normal": mode = connection.connection.CONNECTION_MODE_NORMAL
-                    elif mode_str == "maintain": mode = connection.connection.CONNECTION_MODE_MAINTAIN
-                    elif mode_str == "block": mode = connection.connection.CONNECTION_MODE_BLOCK
+            if args.subcommand == "connection":
+                connection_mgmt = connection.connection()
+                if args.mode:
+                    if args.mode == "__get__":
+                        mode_str = {
+                            connection.connection.CONNECTION_MODE_NORMAL: "normal" ,
+                            connection.connection.CONNECTION_MODE_MAINTAIN: "maintain" ,
+                            connection.connection.CONNECTION_MODE_BLOCK: "block"
+                        }.get( connection_mgmt.get_mode() , "unknown" )
+                        utils.lprint( 1 , f"OpenVPN server is currently in { mode_str } connection mode." )
+                        exit( 0 )
                     else:
-                        utils.lprint( 2 , f"Illegal OpenVPN server connection mode string: { args.mode }" )
-                        exit( 1 )
+                        mode_str = args.mode.lower()
+                        if mode_str == "normal": mode = connection.connection.CONNECTION_MODE_NORMAL
+                        elif mode_str == "maintain": mode = connection.connection.CONNECTION_MODE_MAINTAIN
+                        elif mode_str == "block": mode = connection.connection.CONNECTION_MODE_BLOCK
+                        else:
+                            utils.lprint( 2 , f"Illegal OpenVPN server connection mode string: { args.mode }" )
+                            exit( 1 )
 
-                    exit( connection_mgmt.set_mode( mode ) )
+                        exit( connection_mgmt.set_mode( mode ) )
 
     if not is_openvpn_server_running():
         exit( 1 )
