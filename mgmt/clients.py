@@ -139,7 +139,7 @@ class clients:
                     continue
                 # this normal user is not blocked or indefinitely blocked
                 else:
-                    ts_now = datetime.datetime.fromtimestamp( datetime.datetime.now() )
+                    ts_now = datetime.datetime.now().timestamp()
                     if block_to < ts_now:
                         log.logger.write_log( self._loghost , f"Client is no longer blocked. [cn=\"{ self._client_data[i]['common_name'] }\", block_to={ block_to }]" )
                         self._client_data[i]["block_to"] = -1
