@@ -38,6 +38,7 @@ def setup_args():
     connection_arg_group = connection_parser.add_mutually_exclusive_group()
     connection_arg_group.add_argument( "--mode" , nargs = '?' , metavar = "MODE" , const = "__get__" , type = str , help = "Get / Set OpenVPN server connection mode" )
     connection_arg_group.add_argument( "--list" , default = False , action = "store_true" , help = "List all connection detailed datas" )
+    connection_arg_group.add_argument( "--kill" , metavar = "COMMON_NAME" , type = str , help = "Kill a connected client's connection" )
 
 def is_openvpn_server_running() -> bool:
     try:
@@ -101,7 +102,7 @@ def main():
                             connection.connection.CONNECTION_MODE_MAINTAIN: "maintain" ,
                             connection.connection.CONNECTION_MODE_BLOCK: "block"
                         }.get( connection_mgmt.get_mode() , "unknown" )
-                        utils.lprint( 1 , f"OpenVPN server is currently in { mode_str } connection mode." )
+                        utils.lprint( 1 , f"OpenVPN server is currently in { mode_str } connection mode" )
                         exit( 0 )
                     else:
                         mode_str = args.mode.lower()
@@ -114,6 +115,8 @@ def main():
                         exit( connection_mgmt.set_mode( mode ) )
                 elif args.list:
                     exit( connection_mgmt.list_connection_datas() )
+                elif args.kill:
+                    exit( connection_mgmt.kill_connection( args.kill ) )
 
     if not is_openvpn_server_running():
         exit( 1 )

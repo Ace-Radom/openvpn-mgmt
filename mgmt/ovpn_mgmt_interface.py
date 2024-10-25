@@ -55,7 +55,7 @@ class ovpn_mgmt_interface:
             self._sock = None
             return 1
         
-    def exec( self , cmd: str ) -> tuple[int,str]:
+    def exec( self , cmd: str , end_sign: str = "END" ) -> tuple[int,str]:
         try:
             if self._sock is None or not ovpn_mgmt_interface.ovpn_mgmt_interface_connected:
                 raise Exception( "OpenVPN management interface not connected" )
@@ -68,7 +68,7 @@ class ovpn_mgmt_interface:
                 if not data:
                     break
                 response += data
-                if "END" in response.decode( 'utf-8' ):
+                if end_sign in response.decode( 'utf-8' ):
                     break
 
             response_str = response.decode( 'utf-8' )
