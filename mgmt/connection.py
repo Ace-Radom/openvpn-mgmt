@@ -3,9 +3,9 @@
 
 import json
 import os
-import utils
 
 from mgmt import log
+from mgmt import utils
 
 class connection:
     CONNECTION_MODE_NORMAL = 0
