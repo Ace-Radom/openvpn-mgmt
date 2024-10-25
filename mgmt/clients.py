@@ -7,6 +7,7 @@ import json
 import os
 import re
 
+from mgmt import connection
 from mgmt import log
 from mgmt import ovpn_mgmt_interface
 from mgmt import ovpn_status
@@ -33,9 +34,9 @@ class clients:
 
         return
     
-    def read_client_data( self ) -> list:
+    def read_client_data( self ):
         if not os.path.isfile( self._client_data_file ):
-            return []
+            return
 
         with open( self._client_data_file , 'r' , encoding = 'utf-8' ) as rFile:
             try:
@@ -311,8 +312,17 @@ class clients:
         if len( client_data ) == 0:
             return ( 1 , "error" , f"Client \"{ common_name }\" not found in cached client data." )
         
+        current_connection_mode = connection.connection().get_mode()
+
+        if current_connection_mode == connection.connection.CONNECTION_MODE_BLOCK:
+            return ( 0 , "yes" , "Server is in block connection mode." )
+            # in block connection mode all clients are not allowed to connect including admins
+        
         if client_data[0]["user_group"] == self.USER_ADMIN:
             return ( 0 , "no" , f"Client \"{ common_name }\" is in admin user group." )
+        elif current_connection_mode == connection.connection.CONNECTION_MODE_MAINTAIN:
+            return ( 0 , "yes" , "Server is in maintain connection mode." )
+            # in maintain connection mode only admins are allowed to connect
         elif client_data[0]["user_group"] == self.USER_BLOCKED:
             return ( 0 , "yes" , f"Client \"{ common_name }\" is in blocked user group." )
         elif client_data[0]["user_group"] == self.USER_NORMAL:

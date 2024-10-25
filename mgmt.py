@@ -9,6 +9,7 @@ import subprocess
 import sys
 
 from mgmt import clients
+from mgmt import connection
 from mgmt import log
 from mgmt import ovpn_script
 from mgmt import settings
@@ -31,6 +32,10 @@ def setup_args():
     clients_arg_group.add_argument( "--refresh" , default = False , action = "store_true" , help = "Refresh valid clients cached datas" )
     clients_arg_group.add_argument( "--block" , nargs = 2 , metavar = tuple( [ "COMMON_NAME" , "BLOCK_TO" ] ) , type = str , help = "Block a specific client" )
     clients_arg_group.add_argument( "--is-blocked" , metavar = "COMMON_NAME" , type = str , help = "Check is a specific client being blocked" )
+
+    connection_parser = parser.add_subparsers( dest = "connection" ).add_parser( "connection" , help = "Manage OpenVPN server connections" )
+    connection_arg_group = connection_parser.add_mutually_exclusive_group()
+    connection_arg_group.add_argument( "--mode" , nargs = '?' , metavar = "MODE" , const = "" , type = str , help = "Get / Set OpenVPN server connection mode" )
 
 def is_openvpn_server_running() -> bool:
     try:
@@ -83,6 +88,28 @@ def main():
                 exit( clients_mgmt.block_client( args.block[0] , args.block[1] ) )
             elif args.is_blocked:
                 exit( clients_mgmt.is_client_blocked( args.is_blocked ) )
+
+        if args.connection:
+            connection_mgmt = connection.connection()
+            if args.mode:
+                if args.mode == "":
+                    mode_str = {
+                        connection.connection.CONNECTION_MODE_NORMAL: "normal" ,
+                        connection.connection.CONNECTION_MODE_MAINTAIN: "maintain" ,
+                        connection.connection.CONNECTION_MODE_BLOCK: "block"
+                    }.get( connection_mgmt.get_mode() , "unknown" )
+                    utils.lprint( 1 , f"Current OpenVPN server is in { mode_str } connection mode." )
+                    exit( 0 )
+                else:
+                    mode_str = args.mode.lower()
+                    if mode_str == "normal": mode = connection.connection.CONNECTION_MODE_NORMAL
+                    elif mode_str == "maintain": mode = connection.connection.CONNECTION_MODE_MAINTAIN
+                    elif mode_str == "block": mode = connection.connection.CONNECTION_MODE_BLOCK
+                    else:
+                        utils.lprint( 2 , f"Illegal OpenVPN server connection mode string: { args.mode }" )
+                        exit( 1 )
+
+                    exit( connection_mgmt.set_mode( mode ) )
 
     if not is_openvpn_server_running():
         exit( 1 )
