@@ -49,3 +49,7 @@ class ovpn_status:
             if client["common_name"] == common_name:
                 return True
         return False
+
+if __name__ == "__main__":
+    print( "This is a module, should not be executed" )
+    exit( 1 )

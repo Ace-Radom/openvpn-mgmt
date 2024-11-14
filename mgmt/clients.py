@@ -28,11 +28,11 @@ class clients:
         
         if not os.path.isdir( "/var/openvpn-mgmt" ):
             os.makedirs( "/var/openvpn-mgmt" )
-            os.chmod( "/var/openvpn-mgmt" , 666 )
+            os.chmod( "/var/openvpn-mgmt" , 0o666 )
 
         if not os.path.isfile( self._client_data_file ):
             self.refresh_client_data()
-            os.chmod( self._client_data_file , 666 )
+            os.chmod( self._client_data_file , 0o666 )
 
         return
     
@@ -347,3 +347,7 @@ class clients:
         print( tag )
         print( msg )
         return ret
+
+if __name__ == "__main__":
+    print( "This is a module, should not be executed" )
+    exit( 1 )

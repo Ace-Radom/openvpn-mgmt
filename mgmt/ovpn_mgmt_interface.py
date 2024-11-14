@@ -94,3 +94,7 @@ class ovpn_mgmt_interface:
         except Exception as e:
             log.logger.write_log( self._loghost , f"Failed to disconnect OpenVPN management interface. [error='{ e }']" )
             return 1
+
+if __name__ == "__main__":
+    print( "This is a module, should not be executed" )
+    exit( 1 )

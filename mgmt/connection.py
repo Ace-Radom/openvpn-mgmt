@@ -153,3 +153,7 @@ class connection:
 
         return ret
         # if success, ret should be 0; otherwise it should not be 0
+
+if __name__ == "__main__":
+    print( "This is a module, should not be executed" )
+    exit( 1 )
