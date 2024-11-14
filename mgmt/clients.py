@@ -28,9 +28,11 @@ class clients:
         
         if not os.path.isdir( "/var/openvpn-mgmt" ):
             os.makedirs( "/var/openvpn-mgmt" )
+            os.chmod( "/var/openvpn-mgmt" , 666 )
 
         if not os.path.isfile( self._client_data_file ):
             self.refresh_client_data()
+            os.chmod( self._client_data_file , 666 )
 
         return
     
