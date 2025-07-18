@@ -10,6 +10,6 @@ downlink_traffic=$bytes_sent
 
 log_msg_header=$(printf "%-49s" "$(date '+%Y-%m-%d %H:%M:%S.%6N %Z' | awk '{print $1, $2, $3}') [openvpn]")
 
-flock -x "$current_log_file" echo "$log_msg_header Client diconnected. [cn='$cn', real_ip='$real_ip', virtual_ip='$virtual_ip', uplink=$uplink_traffic, downlink=$downlink_traffic]" >> "$current_log_file"
+flock -x "$current_log_file" echo "$log_msg_header Client disconnected. [cn='$cn', real_ip='$real_ip', virtual_ip='$virtual_ip', uplink=$uplink_traffic, downlink=$downlink_traffic]" >> "$current_log_file"
 
 exit 0
