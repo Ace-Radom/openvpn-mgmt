@@ -13,10 +13,6 @@ class ovpn_status:
         self.last_log_refresh_datetime = datetime.datetime.min
         self.connection_count = 0
         self.detailed_connection_data = []
-        if settings.settings["server"]["is_ipv6_enabled"]:
-            self.col_offset = 1
-        else:
-            self.col_offset = 0
 
     def parse_status_log( self , log: str ) -> int:
         log_rows = []
