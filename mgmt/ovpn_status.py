@@ -26,27 +26,23 @@ class ovpn_status:
         self.version = log_rows[0][1]
         self.last_log_refresh_datetime = datetime.datetime.fromtimestamp( int( log_rows[1][2] ) )
 
-        log_rows.pop( 0 )
-        log_rows.pop( 0 )
-        log_rows.pop( -1 )
-        log_rows.pop( -1 )
-        # pop datas: server version; last refresh time; global stats; END sign
-
-        self.connection_count = ( len( log_rows ) - 2 ) // 2
         self.detailed_connection_data = []
 
-        for i in range( 1 , self.connection_count + 1 ):
-            self.detailed_connection_data.append( {
-                "common_name": log_rows[i][1] ,
-                "real_addr": log_rows[i][2] ,
-                "virtual_addr": log_rows[i][3] ,
-                "uplink": int( log_rows[i][5] ) ,
-                "downlink": int( log_rows[i][6] ) ,
-                "connected_since": int( log_rows[i][8] ) ,
-                "username": log_rows[i][9] ,
-                "client_id": log_rows[i][10] ,
-                "data_channal_cipher": log_rows[i][12]
-            } )
+        for i in range( 1 , len( log_rows ) ):
+            if log_rows[i][0] == "CLIENT_LIST":
+                self.detailed_connection_data.append( {
+                    "common_name": log_rows[i][1] ,
+                    "real_addr": log_rows[i][2] ,
+                    "virtual_addr": log_rows[i][3] ,
+                    "uplink": int( log_rows[i][5] ) ,
+                    "downlink": int( log_rows[i][6] ) ,
+                    "connected_since": int( log_rows[i][8] ) ,
+                    "username": log_rows[i][9] ,
+                    "client_id": log_rows[i][10] ,
+                    "data_channal_cipher": log_rows[i][12]
+                } )
+
+        self.connection_count = len( self.detailed_connection_data )
 
         return 0
 
