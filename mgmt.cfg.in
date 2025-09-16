@@ -11,6 +11,7 @@ server_cfg=
 mgmt_interface_server=
 mgmt_interface_port=
 mgmt_interface_pswd=
+is_ipv6_enabled=0
 
 [clients]
 admins=

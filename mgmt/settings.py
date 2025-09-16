@@ -15,7 +15,8 @@ settings = {
         "server_cfg": "/etc/openvpn/server/server.conf" ,
         "mgmt_interface_server": None ,
         "mgmt_interface_port": None ,
-        "mgmt_interface_pswd": None
+        "mgmt_interface_pswd": None ,
+        "is_ipv6_enabled": False
     } ,
     "clients": {
         "admins": [] ,
@@ -48,6 +49,11 @@ def parse_settings( settings_path: str ):
             settings["server"]["mgmt_interface_port"] = int( parser["server"]["mgmt_interface_port"] )
         if parser.has_option( "server" , "mgmt_interface_pswd" ) and len( parser["server"]["mgmt_interface_pswd"] ) != 0:
             settings["server"]["mgmt_interface_pswd"] = parser["server"]["mgmt_interface_pswd"]
+        if parser.has_option( "server" , "is_ipv6_enabled" ) and len( parser["server"]["is_ipv6_enabled"] ) != 0 and parser["server"]["is_ipv6_enabled"].isdigit():
+            if int( parser["server"]["is_ipv6_enabled"] ) != 0:
+                settings["server"]["is_ipv6_enabled"] = True
+            else:
+                settings["server"]["is_ipv6_enabled"] = False
 
     if parser.has_section( "clients" ):
         if parser.has_option( "clients" , "admins" ) and len( parser["clients"]["admins"] ) != 0:
