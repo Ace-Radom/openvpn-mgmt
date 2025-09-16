@@ -5,8 +5,6 @@ import csv
 import datetime
 import io
 
-from mgmt import settings
-
 class ovpn_status:
     def __init__( self ):
         self.version = ""
