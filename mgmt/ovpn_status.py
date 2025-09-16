@@ -40,12 +40,12 @@ class ovpn_status:
                 "common_name": log_rows[i][1] ,
                 "real_addr": log_rows[i][2] ,
                 "virtual_addr": log_rows[i][3] ,
-                "uplink": int( log_rows[i][5+self.col_offset] ) ,
-                "downlink": int( log_rows[i][6+self.col_offset] ) ,
-                "connected_since": int( log_rows[i][8+self.col_offset] ) ,
-                "username": log_rows[i][9+self.col_offset] ,
-                "client_id": log_rows[i][10+self.col_offset] ,
-                "data_channal_cipher": log_rows[i][12+self.col_offset]
+                "uplink": int( log_rows[i][5] ) ,
+                "downlink": int( log_rows[i][6] ) ,
+                "connected_since": int( log_rows[i][8] ) ,
+                "username": log_rows[i][9] ,
+                "client_id": log_rows[i][10] ,
+                "data_channal_cipher": log_rows[i][12]
             } )
 
         return 0
