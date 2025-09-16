@@ -1,4 +1,4 @@
-name: Update codes on OpenVPN server 1
+name: Update codes on OpenVPN test server
 
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       - name: Update Codes
         uses: appleboy/ssh-action@v1.1.0
         with:
-          host: ${{ secrets.OPENVPN_SERVER_1_HOST }}
+          host: ${{secrets.OPENVPN_SERVER_1_HOST}}
           username: ${{secrets.OPENVPN_SERVER_1_USERNAME}}
           password: ${{secrets.OPENVPN_SERVER_1_KEY}}
           script: |
