@@ -5,7 +5,6 @@ import argparse
 import csv
 import datetime
 import os
-import subprocess
 import sys
 
 from mgmt import clients
@@ -41,31 +40,16 @@ def setup_args():
     connection_arg_group.add_argument( "--kill" , metavar = "COMMON_NAME" , type = str , help = "Kill a connected client's connection" )
 
 def is_openvpn_server_running() -> bool:
-    try:
-        result = subprocess.run(
-            [ "systemctl" , "status" , settings.settings["server"]["service_name"] ] ,
-            stdout = subprocess.PIPE ,
-            stderr = subprocess.PIPE ,
-            text = True
-        )
-
-        if "active (running)" not in result.stdout:
-            utils.lprint( 2 , "OpenVPN server is not running" )
-            return False
-        # service stopped
-
-        for line in result.stdout.splitlines():
-            if "Active:" in line:
-                global server_uptime
-                uptime_line = line.split( ';' )[0]
-                server_uptime = uptime_line.split( "since" )[-1][4:].strip()
-                return True
-
-    except Exception as e:
-        utils.lprint( 2 , f"Error when checking service: { e }" )
+    service_name = settings.settings["server"]["service_name"]
+    ret = utils.systemctl.has_service( service_name )
+    if ret != utils.systemctl.RET_HAS_SERVICE:
+        utils.lprint( 2 , f"Check OpenVPN service existence failed with code { ret }" )
         return False
-
-    return False
+    ret = utils.systemctl.is_service_running( service_name )
+    if ret != utils.systemctl.RET_SERVICE_RUNNING:
+        utils.lprint( 2 , f"OpenVPN server is not running or error occured: { ret }" )
+        return False
+    return True
 
 def main():
     log.init_global_logger()
