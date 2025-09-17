@@ -6,7 +6,8 @@ import subprocess
 
 from mgmt import settings
 
-def conv_bytes_to_formel_str( bytes_count: int ) -> str:
+
+def conv_bytes_to_formel_str(bytes_count: int) -> str:
     if bytes_count < 1024:
         return f"{ bytes_count } bytes"
     elif bytes_count < 1048576:
@@ -15,13 +16,16 @@ def conv_bytes_to_formel_str( bytes_count: int ) -> str:
         return f"{ bytes_count / 1048576 :.2f} MB"
     else:
         return f"{ bytes_count / 1073741824 :.2f} GB"
-    
-def lprint( level: int , *args , **kwargs ):
+
+
+def lprint(level: int, *args, **kwargs):
     if level >= settings.settings["base"]["output_level"]:
-        print( *args , **kwargs )
+        print(*args, **kwargs)
+
 
 def get_tzname() -> str:
     return datetime.datetime.now().astimezone().tzname()
+
 
 class systemctl:
     RET_ERROR = -1
@@ -31,13 +35,13 @@ class systemctl:
     RET_SERVICE_NOT_RUNNING = 1
 
     @staticmethod
-    def has_service( service: str ) -> int:
+    def has_service(service: str) -> int:
         try:
             result = subprocess.run(
-                [ "systemctl" , "list-units" , "--type=service" ] ,
-                stdout = subprocess.PIPE ,
-                stderr = subprocess.PIPE ,
-                text = True
+                ["systemctl", "list-units", "--type=service"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
             )
             if service in result.stdout:
                 return systemctl.RET_HAS_SERVICE
@@ -47,13 +51,13 @@ class systemctl:
             return systemctl.RET_ERROR
 
     @staticmethod
-    def is_service_running( service: str ) -> int:
+    def is_service_running(service: str) -> int:
         try:
             result = subprocess.run(
-                [ "systemctl" , "status" , service ] ,
-                stdout = subprocess.PIPE ,
-                stderr = subprocess.PIPE ,
-                text = True
+                ["systemctl", "status", service],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
             )
             if "active (running)" in result.stdout:
                 return systemctl.RET_SERVICE_RUNNING
@@ -62,6 +66,7 @@ class systemctl:
         except:
             return systemctl.RET_ERROR
 
+
 if __name__ == "__main__":
-    print( "This is a module, should not be executed" )
-    exit( 1 )
+    print("This is a module, should not be executed")
+    exit(1)
