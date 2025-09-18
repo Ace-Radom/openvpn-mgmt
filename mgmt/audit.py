@@ -14,7 +14,7 @@ class audit:
         self._usage_datas = {}
         self._service_starttime = ""
 
-    def _parse_log(self, year: int, month: int, day: int) -> bool:
+    def _parse_log_in_period(self, year: int, month: int, day: int) -> bool:
         log_str = log.logger.read_log()
         if log_str == "":
             utils.lprint(2, "Cannot read log, parse failed")
@@ -57,7 +57,11 @@ class audit:
                 disconnected_time = datetime.datetime.strptime(
                     disconnected_time_match.group(), "%Y-%m-%d %H:%M:%S.%f"
                 )
-                if not ((year == 0 or year == disconnected_time.year) and (month == 0 or month == disconnected_time.month) and (day == 0 or day == disconnected_time.day)):
+                if not (
+                    (year == 0 or year == disconnected_time.year)
+                    and (month == 0 or month == disconnected_time.month)
+                    and (day == 0 or day == disconnected_time.day)
+                ):
                     continue
                 # not in period
 
@@ -105,30 +109,45 @@ class audit:
             return 1
 
         if len(self._connection_datas) == 0:
-            if not self._parse_log(year, month, day):
+            if not self._parse_log_in_period(year, month, day):
                 utils.lprint(2, "Failed to parse log, cannot collect usage data")
                 return 1
 
         for data in self._connection_datas:
-            if (
-                (year == 0 or year == data["dt_year"])
-                and (month == 0 or month == data["dt_month"])
-                and (day == 0 or day == data["dt_day"])
-            ):
-                cn = data["cn"]
-                uplink = data["uplink"]
-                downlink = data["downlink"]
-                if cn not in self._usage_datas:
-                    self._usage_datas[cn] = {"uplink": 0, "downlink": 0}
-                # new cn
-                self._usage_datas[cn]["uplink"] += uplink
-                self._usage_datas[cn]["downlink"] += downlink
+            cn = data["cn"]
+            uplink = data["uplink"]
+            downlink = data["downlink"]
+            if cn not in self._usage_datas:
+                self._usage_datas[cn] = {"uplink": 0, "downlink": 0}
+            # new cn
+            self._usage_datas[cn]["uplink"] += uplink
+            self._usage_datas[cn]["downlink"] += downlink
 
         return 0
 
     def show_usage_data(self) -> int:
-        for key, data in self._usage_datas.items():
-            print(key, data)
+        datas_list = []
+        datas_list.append(["Common Name", "Uplink (B)", "Downlink (B)"])
+
+        for cn, data in self._usage_datas.items():
+            uplink = data["uplink"]
+            downlink = data["downlink"]
+            datas_list.append(
+                [
+                    cn,
+                    f"{ utils.conv_bytes_to_formel_str(uplink) } ({ uplink })",
+                    f"{ utils.conv_bytes_to_formel_str(downlink) } ({ downlink })",
+                ]
+            )
+
+        col_widths = [max(len(str(item)) for item in col) for col in zip(*datas_list)]
+        for row in datas_list:
+            utils.lprint(
+                1,
+                " | ".join(
+                    f"{ item.ljust( col_widths[i] ) }" for i, item in enumerate(row)
+                ),
+            )
 
         return 0
 

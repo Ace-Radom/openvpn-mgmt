@@ -5,7 +5,9 @@ import argparse
 import csv
 import datetime
 import os
+import re
 import sys
+from typing import Tuple
 
 from mgmt import audit
 from mgmt import clients
@@ -41,7 +43,12 @@ def setup_args():
     subcommand_subparser = parser.add_subparsers(dest="subcommand")
 
     audit_parser = subcommand_subparser.add_parser("audit", help="Audit OpenVPN usage")
-    # audit_arg_group = audit_parser.add_mutually_exclusive_group()
+    audit_parser.add_argument(
+        "--period",
+        metavar="PERIOD",
+        type=str,
+        help="Set usage audit period (YEAR[.MONTH[.DAY]])",
+    )
 
     clients_parser = subcommand_subparser.add_parser(
         "clients", help="Manage OpenVPN clients"
@@ -102,6 +109,35 @@ def setup_args():
     )
 
 
+def parse_period(period: str) -> Tuple[int, int, int]:
+    if period is None:
+        utils.lprint(2, "Empty period string")
+        return -1, -1, -1
+
+    s = period.strip()
+    if s == "":
+        utils.lprint(2, "Empty period string")
+        return -1, -1, -1
+
+    m = re.match(r"^\s*(\d+)(?:\.(\d*))?(?:\.(\d*))?\s*$", s)
+    if not m:
+        utils.lprint(2, f"Invalid period format: {period!r}")
+        return -1, -1, -1
+
+    year = int(m.group(1))
+    month = int(m.group(2)) if m.group(2) else 0
+    day = int(m.group(3)) if m.group(3) else 0
+
+    if month != 0 and not (1 <= month <= 12):
+        utils.lprint(2, f"Invalid month: {month}")
+        return -1, -1, -1
+    if day != 0 and not (1 <= day <= 31):
+        utils.lprint(2, f"Invalid day: {day}")
+        return -1, -1, -1
+
+    return year, month, day
+
+
 def is_openvpn_server_running() -> bool:
     service_name = settings.settings["server"]["service_name"]
     ret = utils.systemctl.has_service(service_name)
@@ -130,8 +166,17 @@ def main():
         if args.subcommand:
             if args.subcommand == "audit":
                 audit_mgmt = audit.audit()
-                audit_mgmt.collect_usage_data_in_period()
+                year = 0
+                month = 0
+                day = 0
+                if args.period:
+                    year, month, day = parse_period(args.period)
+                    if year == -1 or month == -1 or day == -1:
+                        exit(1)
+                    # invalid period
+                audit_mgmt.collect_usage_data_in_period(year, month, day)
                 audit_mgmt.show_usage_data()
+                exit(0)
 
             if args.subcommand == "clients":
                 clients_mgmt = clients.clients()
