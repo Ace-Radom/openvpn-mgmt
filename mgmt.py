@@ -7,6 +7,7 @@ import datetime
 import os
 import sys
 
+from mgmt import audit
 from mgmt import clients
 from mgmt import connection
 from mgmt import log
@@ -38,6 +39,10 @@ def setup_args():
     )
 
     subcommand_subparser = parser.add_subparsers(dest="subcommand")
+
+    audit_parser = subcommand_subparser.add_parser("audit", help="Audit OpenVPN usage")
+    # audit_arg_group = audit_parser.add_mutually_exclusive_group()
+
     clients_parser = subcommand_subparser.add_parser(
         "clients", help="Manage OpenVPN clients"
     )
@@ -123,6 +128,11 @@ def main():
             exit(script_mgmt.install(args.install_ovpn_script))
 
         if args.subcommand:
+            if args.subcommand == "audit":
+                audit_mgmt = audit.audit()
+                audit_mgmt.collect_usage_data_in_period()
+                audit_mgmt.show_usage_data()
+
             if args.subcommand == "clients":
                 clients_mgmt = clients.clients()
                 if args.refresh:
