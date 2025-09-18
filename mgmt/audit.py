@@ -189,8 +189,12 @@ class audit:
                 1,
                 f"Usage data since OpenVPN service started on { self._service_starttime }:",
             )
+        elif len(self._period_str) > 9:
+            utils.lprint(1, f"Usage data on { self._period_str }:")
+        # period contains day
         else:
-            utils.lprint(1, f"Usage data in period { self._period_str }:")
+            utils.lprint(1, f"Usage data in { self._period_str }:")
+        utils.lprint(1)
         utils.lprint(
             1,
             f"Total uplink: { utils.conv_bytes_to_formel_str(self._uplink_total) } ({self._uplink_total})",
@@ -199,6 +203,7 @@ class audit:
             1,
             f"Total downlink: {utils.conv_bytes_to_formel_str(self._downlink_total)} ({self._downlink_total})",
         )
+        utils.lprint(1)
 
         col_widths = [max(len(str(item)) for item in col) for col in zip(*datas_list)]
         for row in datas_list:
