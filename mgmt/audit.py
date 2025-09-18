@@ -14,7 +14,7 @@ class audit:
         self._usage_datas = {}
         self._service_starttime = ""
 
-    def parse_log(self) -> bool:
+    def _parse_log(self, year: int, month: int, day: int) -> bool:
         log_str = log.logger.read_log()
         if log_str == "":
             utils.lprint(2, "Cannot read log, parse failed")
@@ -54,6 +54,12 @@ class audit:
                     error_line_count += 1
                     continue
                 # match disconnected time str
+                disconnected_time = datetime.datetime.strptime(
+                    disconnected_time_match.group(), "%Y-%m-%d %H:%M:%S.%f"
+                )
+                if not ((year == 0 or year == disconnected_time.year) and (month == 0 or month == disconnected_time.month) and (day == 0 or day == disconnected_time.day)):
+                    continue
+                # not in period
 
                 data_match = re.search(data_pattern, msg)
                 if not data_match:
@@ -62,11 +68,8 @@ class audit:
                     error_line_count += 1
                     continue
                 # match datas
-
-                disconnected_time = datetime.datetime.strptime(
-                    disconnected_time_match.group(), "%Y-%m-%d %H:%M:%S.%f"
-                )
                 data = data_match.groupdict()
+
                 connection_data = {
                     "line": line_count,
                     "dt_year": disconnected_time.year,
@@ -102,7 +105,7 @@ class audit:
             return 1
 
         if len(self._connection_datas) == 0:
-            if not self.parse_log():
+            if not self._parse_log(year, month, day):
                 utils.lprint(2, "Failed to parse log, cannot collect usage data")
                 return 1
 
