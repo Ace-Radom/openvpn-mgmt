@@ -12,7 +12,10 @@ class audit:
     def __init__(self) -> None:
         self._connection_datas = []
         self._usage_datas = {}
+        self._uplink_total = 0
+        self._downlink_total = 0
         self._service_starttime = ""
+        self._period_str = ""
 
     def _parse_log_in_period(self, year: int, month: int, day: int) -> bool:
         log_str = log.logger.read_log()
@@ -94,9 +97,43 @@ class audit:
 
         utils.lprint(
             1,
-            f"Total { len(self._connection_datas) } connection datas found, { error_line_count } lines parse failed",
+            f"Total { len(self._connection_datas) } connection datas in period found, { error_line_count } lines parse failed",
         )
         return True
+
+    @staticmethod
+    def _parse_period_to_str(year, month, day) -> str:
+        if year == 0 and month == 0 and day == 0:
+            return ""
+
+        if month == 0 and day == 0:
+            return f"{ year }"
+
+        month_str = {
+            1: "Jan.",
+            2: "Feb.",
+            3: "Mar.",
+            4: "Apr.",
+            5: "May.",
+            6: "Jun.",
+            7: "Jul.",
+            8: "Aug.",
+            9: "Sep.",
+            10: "Oct.",
+            11: "Nov.",
+            12: "Dec.",
+        }.get(month)
+
+        if day == 0:
+            return f"{month_str} {year}"
+
+        if 10 <= day % 100 <= 20:
+            suffix = "th"
+        else:
+            suffix = {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+        day_str = f"{day}{suffix}"
+
+        return f"{day_str} {month_str} {year}"
 
     def collect_usage_data_in_period(
         self, year: int = 0, month: int = 0, day: int = 0
@@ -122,7 +159,13 @@ class audit:
             # new cn
             self._usage_datas[cn]["uplink"] += uplink
             self._usage_datas[cn]["downlink"] += downlink
+            self._uplink_total += uplink
+            self._downlink_total += downlink
 
+        self._usage_datas = {
+            k: self._usage_datas[k] for k in sorted(self._usage_datas.keys())
+        }
+        self._period_str = self._parse_period_to_str(year, month, day)
         return 0
 
     def show_usage_data(self) -> int:
@@ -139,6 +182,23 @@ class audit:
                     f"{ utils.conv_bytes_to_formel_str(downlink) } ({ downlink })",
                 ]
             )
+
+        utils.lprint(1)
+        if self._period_str == "":
+            utils.lprint(
+                1,
+                f"Usage data since OpenVPN service started on { self._service_starttime }:",
+            )
+        else:
+            utils.lprint(1, f"Usage data in period { self._period_str }:")
+        utils.lprint(
+            1,
+            f"Total uplink: { utils.conv_bytes_to_formel_str(self._uplink_total) } ({self._uplink_total})",
+        )
+        utils.lprint(
+            1,
+            f"Total downlink: {utils.conv_bytes_to_formel_str(self._downlink_total)} ({self._downlink_total})",
+        )
 
         col_widths = [max(len(str(item)) for item in col) for col in zip(*datas_list)]
         for row in datas_list:
