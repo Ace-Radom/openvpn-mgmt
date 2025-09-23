@@ -105,6 +105,33 @@ p {
     margin-top: 26px;
 }
 
+/* ================= Success Page Style ================= */
+
+/* .success-container {
+    background: #fff;
+    max-width: 340px;
+    width: 92vw;
+    margin: 80px auto;
+    padding: 36px 26px 32px 26px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(60, 90, 150, 0.10), 0 1.5px 6px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    transition: box-shadow 0.2s;
+}
+
+.success-container h2 {
+    font-size: 1.5rem;
+    color: #1b3c5d;
+    margin-bottom: 18px;
+}
+
+.success-container .jump {
+    font-size: 0.97em;
+    color: #9099a7; */
+/* } */
+
+/* ================= End Success Page Style ================= */
+
 @media (max-width: 500px) {
     .main-card {
         max-width: 97vw;

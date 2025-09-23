@@ -41,6 +41,7 @@ def api_register():
     if user_exists(username):
         return jsonify({"success": False, "msg": "User already exists"}), 409
     add_user(username, password)
+    session["allow_success"] = True
     return jsonify({"success": True, "msg": "Registration successful"})
 
 
@@ -54,6 +55,7 @@ def api_login():
     if not check_user_password(username, password):
         return jsonify({"success": False, "msg": "Username or password incorrect"}), 401
     session["username"] = username
+    session["allow_success"] = True
     return jsonify({"success": True, "msg": "Login successful"})
 
 
@@ -68,3 +70,12 @@ def user():
     if "username" not in session:
         return redirect(url_for("main.login"))
     return render_template("user.html", username=session["username"])
+
+
+@bp.route("/success")
+def success():
+    if not session.pop("allow_success", None):
+        return redirect(url_for("main.login"))
+    msg = request.args.get("msg", "Operation Successful")
+    next_url = request.args.get("next", "/")
+    return render_template("success.html", msg=msg, next_url=next_url)

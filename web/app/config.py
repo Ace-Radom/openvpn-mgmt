@@ -24,21 +24,5 @@ def parse_config(config_path: str):
 
 
 class config:
-    def __init__(self) -> None:
-        if cfg["app"]["secret_key"] is None:
-            raise RuntimeError("Secret key cannot be None")
-        return
-
-    SECRET_KEY = cfg["app"]["secret_key"]
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_SAMESITE = "Lax"
-
-
-class debug_config(config):
-    DEBUG = True
-
-
-class production_config(config):
-    DEBUG = False
-    SESSION_COOKIE_SECURE = True

@@ -13,7 +13,7 @@ if (document.getElementById('login-form')) {
         msgDiv.innerText = data.msg;
         msgDiv.style.color = data.success ? "green" : "red";
         if (data.success) {
-            setTimeout(() => { window.location.href = "/user"; }, 500);
+            window.location.href = `/success?msg=登陆成功！&next=/user`;
         }
     }
 }

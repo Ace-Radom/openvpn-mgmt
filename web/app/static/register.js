@@ -12,5 +12,8 @@ if (document.getElementById('register-form')) {
         let msgDiv = document.getElementById('msg');
         msgDiv.innerText = data.msg;
         msgDiv.style.color = data.success ? "green" : "red";
+        if (data.success) {
+            window.location.href = `/success?msg=注册成功！&next=/login`;
+        }
     }
 }
