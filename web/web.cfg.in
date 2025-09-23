@@ -1,0 +1,3 @@
+[app]
+secret_key=
+is_production_env=0
