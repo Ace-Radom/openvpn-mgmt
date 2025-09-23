@@ -1,0 +1,156 @@
+/* body {
+    background: #f9f9f9;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+.main-card {
+    background: #fff;
+    max-width: 320px;
+    margin: 80px auto;
+    padding: 24px 32px 32px 32px;
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    text-align: center;
+}
+.main-card h2 {
+    margin-bottom: 20px;
+}
+input[type="text"], input[type="password"] {
+    width: 90%;
+    padding: 8px;
+    margin: 8px 0;
+    border-radius: 4px;
+    border: 1px solid #d0d0d0;
+}
+button {
+    width: 96%;
+    padding: 10px;
+    background: #2073e0;
+    border: none;
+    color: #fff;
+    border-radius: 4px;
+    font-size: 1em;
+    cursor: pointer;
+    margin-top: 10px;
+}
+button:hover {
+    background: #1558b0;
+}
+#msg {
+    margin-top: 12px;
+    min-height: 24px;
+} */
+
+body {
+    background: linear-gradient(120deg, #e0e7ef 0%, #f6fafd 100%);
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.main-card {
+    background: #fff;
+    max-width: 340px;
+    width: 92vw;
+    margin: 32px auto;
+    padding: 36px 26px 32px 26px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(60, 90, 150, 0.10), 0 1.5px 6px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: box-shadow 0.2s;
+}
+
+.main-card:hover {
+    box-shadow: 0 12px 48px rgba(60, 90, 150, 0.15), 0 2px 8px rgba(0,0,0,0.07);
+}
+
+.main-card h2 {
+    margin: 0 0 22px 0;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: #1b3c5d;
+    letter-spacing: 0.02em;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+input[type="text"], input[type="password"] {
+    width: 100%;
+    padding: 10px 13px;
+    margin: 0;
+    border-radius: 7px;
+    border: 1px solid #dbe7f3;
+    background: #f6fafd;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus, input[type="password"]:focus {
+    border-color: #2073e0;
+    box-shadow: 0 0 0 2px #2073e03a;
+    background: #fff;
+}
+
+button {
+    width: 100%;
+    padding: 11px 0;
+    background: linear-gradient(90deg, #2073e0 70%, #48b1f3 100%);
+    border: none;
+    color: #fff;
+    border-radius: 7px;
+    font-size: 1.08em;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 8px rgba(32, 115, 224, 0.07);
+    transition: background 0.16s, box-shadow 0.18s;
+}
+
+button:hover, button:focus {
+    background: linear-gradient(90deg, #1b5fb7 70%, #3095d4 100%);
+    box-shadow: 0 4px 20px rgba(32, 115, 224, 0.12);
+}
+
+#msg {
+    margin-top: 16px;
+    min-height: 24px;
+    font-size: 1em;
+    transition: color 0.2s;
+}
+
+a {
+    color: #2073e0;
+    text-decoration: none;
+    transition: color 0.18s;
+}
+
+a:hover {
+    color: #1b5fb7;
+    text-decoration: underline;
+}
+
+p {
+    font-size: 0.97em;
+    color: #607489;
+    margin-top: 26px;
+}
+
+@media (max-width: 500px) {
+    .main-card {
+        max-width: 97vw;
+        padding: 22px 8vw 22px 8vw;
+        border-radius: 0.6em;
+    }
+    h2 { font-size: 1.1rem; }
+    button { font-size: 1em; }
+}

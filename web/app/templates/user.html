@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="main-card">
+        <h2>欢迎，{{ username }}！</h2>
+        <p>这是您的用户中心页面，仅登录后可见。</p>
+        <a href="/logout" style="display:inline-block;margin-top:18px;color:#2073e0;">退出登录</a>
+    </div>
+</body>
+</html>
