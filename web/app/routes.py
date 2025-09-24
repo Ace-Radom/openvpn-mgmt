@@ -40,7 +40,8 @@ def api_register():
         return jsonify({"success": False, "msg": "Username and password required"}), 400
     if user_exists(username):
         return jsonify({"success": False, "msg": "User already exists"}), 409
-    add_user(username, password)
+    if not add_user(username, password):
+        return jsonify({"success": False, "msg": "DB error"}), 500
     session["allow_success"] = True
     return jsonify({"success": True, "msg": "Registration successful"})
 
