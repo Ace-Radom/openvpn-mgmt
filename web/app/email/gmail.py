@@ -11,7 +11,11 @@ from jinja2 import Environment, FileSystemLoader
 from app import config
 
 SCOPES = ["https://mail.google.com/"]
-templates = Environment(loader=FileSystemLoader(os.path.join(os.path.split(os.path.realpath(__file__))[0], "templates")))
+templates = Environment(
+    loader=FileSystemLoader(
+        os.path.join(os.path.split(os.path.realpath(__file__))[0], "templates")
+    )
+)
 
 
 def auth_gmail_api(token_path: str, secret_path: str):
@@ -35,7 +39,9 @@ def auth_gmail_api(token_path: str, secret_path: str):
     return build_service("Gmail", "v1", credentials=creds, static_discovery=False)
 
 
-def create_email(reciever_email_addr: str, subject: str, template_name: str, context: dict):
+def create_email(
+    reciever_email_addr: str, subject: str, template_name: str, context: dict
+):
     template = templates.get_template(template_name)
     mail = MIMEText(template.render(context), "html", "utf-8")
     mail["from"] = config.config["gmail"]["sender_email_addr"]
@@ -45,14 +51,19 @@ def create_email(reciever_email_addr: str, subject: str, template_name: str, con
     return {"raw": urlsafe_b64encode(mail.as_bytes()).decode()}
 
 
-def send_email(reciever_email_addr: str, subject: str, template_name: str, context: dict):
-    service = auth_gmail_api(config.config["gmail"]["token_path"], config.config["gmail"]["secret_path"])
+def send_email(
+    reciever_email_addr: str, subject: str, template_name: str, context: dict
+):
+    service = auth_gmail_api(
+        config.config["gmail"]["token_path"], config.config["gmail"]["secret_path"]
+    )
 
     return (
         service.users()
         .messages()
         .send(
-            userId="me", body=create_email(reciever_email_addr, subject, template_name, context)
+            userId="me",
+            body=create_email(reciever_email_addr, subject, template_name, context),
         )
         .execute()
     )
