@@ -11,8 +11,22 @@
     <div class="main-card">
         <h2>用户注册</h2>
         <form id="register-form">
-            <input type="text" name="username" id="username" placeholder="用户名" required>
-            <input type="password" name="password" id="password" placeholder="密码" required>
+            <div class="form-group">
+                <input type="text" name="username" id="username" placeholder="用户名" required autocomplete="username">
+                <span class="input-icon" id="username_icon"></span>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" id="email" placeholder="邮箱" required autocomplete="email">
+                <span class="input-icon" id="email_icon"></span>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" id="password" placeholder="密码" required autocomplete="new-password">
+                <span class="input-icon" id="password_icon"></span>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password_confirm" id="password_confirm" placeholder="确认密码" required autocomplete="new-password">
+                <span class="input-icon" id="password_confirm_icon"></span>
+            </div>
             <button type="submit">注册</button>
         </form>
         <div id="msg"></div>
