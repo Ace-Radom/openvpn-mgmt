@@ -1,6 +1,7 @@
 import os
 
 from app import config, create_app, db
+from app.email import gmail
 
 base_dir = os.path.split(os.path.realpath(__file__))[0]
 config.parse_config(os.path.join(base_dir, "web.cfg"))
@@ -15,7 +16,12 @@ if config.config["app"]["is_production_env"]:
 else:
     app.config.update(DEBUG=True)
 
-db.init_db()
+if not db.init_db():
+    raise RuntimeError("Init DB failed")
+
+gmail.fetch_gmail_discovery()
+gmail.auth_gmail_api()
+gmail.secure_gmail_related_files()
 
 if __name__ == "__main__":
     app.run()

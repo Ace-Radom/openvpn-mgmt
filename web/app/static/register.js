@@ -128,7 +128,7 @@ if (document.getElementById('register-form')) {
         let res = await fetch('/api/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password: pswd })
+            body: JSON.stringify({ username, password: pswd, email })
         });
         let data = await res.json();
         msg.innerText = data.msg;
