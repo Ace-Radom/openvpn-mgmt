@@ -49,3 +49,12 @@ def success():
     msg = request.args.get("msg", "Operation Successful")
     next_url = request.args.get("next", "/")
     return render_template("success.html", msg=msg, next_url=next_url)
+
+
+@bp.route("/error")
+def error():
+    if not session.pop("allow_error", None):
+        return redirect(url_for("view.login"))
+    msg = request.args.get("msg", "Operation Failed")
+    next_url = request.args.get("next", "/")
+    return render_template("error.html", msg=msg, next_url=next_url)

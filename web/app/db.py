@@ -102,7 +102,32 @@ def add_user_not_verified(username: str, password: str, email: str) -> str | Non
         conn.close()
 
 
-def check_user_password(username, password):
+def verify_user(token: str) -> bool:
+    if not verify_token_exists(token):
+        return False
+    
+    conn = get_conn()
+    c = conn.cursor()
+    try:
+        c.execute("BEGIN TRANSACTION;")
+        c.execute(
+            """
+            INSERT INTO users (username, password_hash, email)
+                SELECT username, password_hash, email FROM users_not_verified WHERE verify_token = ?;
+        """,
+            (token,)
+        )
+        c.execute("DELETE FROM users_not_verified WHERE verify_token = ?;", (token,))
+        conn.commit()
+        return True
+    except:
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+def check_user_password(username, password) -> bool:
     conn = get_conn()
     c = conn.cursor()
     c.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
