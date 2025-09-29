@@ -1,8 +1,10 @@
+import json
 import os
+import requests
 
 from base64 import urlsafe_b64encode
 from email.mime.text import MIMEText
-from googleapiclient.discovery import build as build_service
+from googleapiclient.discovery import build_from_document as build_service
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -10,6 +12,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from app import config
 
+GMAIL_DISCOVERY_URL = "https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest"
 SCOPES = ["https://mail.google.com/"]
 templates = Environment(
     loader=FileSystemLoader(
@@ -18,7 +21,21 @@ templates = Environment(
 )
 
 
-def auth_gmail_api(token_path: str, secret_path: str):
+def fetch_gmail_discovery() -> None:
+    res = requests.get(GMAIL_DISCOVERY_URL, timeout=10)
+    res.raise_for_status()
+    with open(
+        config.config["gmail"]["discovery_path"], "w", encoding="utf-8"
+    ) as discovery:
+        json.dump(res.json(), discovery)
+    return
+
+
+def auth_gmail_api():
+    discovery_path = config.config["gmail"]["discovery_path"]
+    token_path = config.config["gmail"]["token_path"]
+    secret_path = config.config["gmail"]["secret_path"]
+
     creds = None
     if os.path.exists(token_path):
         with open(token_path, "r") as token:
@@ -36,7 +53,17 @@ def auth_gmail_api(token_path: str, secret_path: str):
         with open(token_path, "w") as token:
             token.write(creds.to_json())
 
-    return build_service("Gmail", "v1", credentials=creds, static_discovery=False)
+    with open(discovery_path, "r", encoding="utf-8") as discovery:
+        gmail_service = json.load(discovery)
+
+    return build_service(gmail_service, credentials=creds)
+
+
+def secure_gmail_related_files() -> None:
+    os.chmod(config.config["gmail"]["discovery_path"], 0o644)
+    os.chmod(config.config["gmail"]["token_path"], 0o600)
+    os.chmod(config.config["gmail"]["secret_path"], 0o600)
+    return
 
 
 def create_email(
@@ -54,9 +81,7 @@ def create_email(
 def send_email(
     reciever_email_addr: str, subject: str, template_name: str, context: dict
 ):
-    service = auth_gmail_api(
-        config.config["gmail"]["token_path"], config.config["gmail"]["secret_path"]
-    )
+    service = auth_gmail_api()
 
     return (
         service.users()
