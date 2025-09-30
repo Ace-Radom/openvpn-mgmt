@@ -1,5 +1,7 @@
 import sqlite3
+from datetime import datetime
 from hashlib import sha256
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import config
@@ -75,7 +77,9 @@ def verify_token_exists(token: str) -> bool:
 
 def add_user_not_verified(username: str, password: str, email: str) -> str | None:
     password_hash = generate_password_hash(password)
-    verify_token = sha256(f"{username}:{password}:{email}".encode("utf-8")).hexdigest()
+    verify_token = sha256(
+        f"{username}:{password}:{email}:{datetime.now()}".encode("utf-8")
+    ).hexdigest()
     token_len = 24
     while token_len <= 64:
         if not verify_token_exists(verify_token[:token_len]):
@@ -105,7 +109,7 @@ def add_user_not_verified(username: str, password: str, email: str) -> str | Non
 def verify_user(token: str) -> bool:
     if not verify_token_exists(token):
         return False
-    
+
     conn = get_conn()
     c = conn.cursor()
     try:
@@ -115,7 +119,7 @@ def verify_user(token: str) -> bool:
             INSERT INTO users (username, password_hash, email)
                 SELECT username, password_hash, email FROM users_not_verified WHERE verify_token = ?;
         """,
-            (token,)
+            (token,),
         )
         c.execute("DELETE FROM users_not_verified WHERE verify_token = ?;", (token,))
         conn.commit()
