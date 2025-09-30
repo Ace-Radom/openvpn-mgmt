@@ -75,6 +75,23 @@ def verify_token_exists(token: str) -> bool:
     return result is not None
 
 
+def get_not_verified_user_data_with_verify_token(token: str) -> dict:
+    if not verify_token_exists(token):
+        return {}
+
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute(
+        "SELECT username, email FROM users_not_verified WHERE verify_token = ?",
+        (token,),
+    )
+    row = c.fetchone()
+    conn.close()
+    if row:
+        return {"username": row["username"], "email": row["email"]}
+    return {}
+
+
 def add_user_not_verified(username: str, password: str, email: str) -> str | None:
     password_hash = generate_password_hash(password)
     verify_token = sha256(
