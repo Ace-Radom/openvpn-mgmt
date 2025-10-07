@@ -1,28 +1,35 @@
+import re
 import requests
 
 GLANCES_BASE_URL = "http://127.0.0.1:61208/api/4"
 
 
-def get_cpu_data() -> dict | None:
-    response = requests.get(f"{ GLANCES_BASE_URL }/cpu")
+def get_data_from_glances(endpoint: str, plaintext=False):
+    response = requests.get(f"{ GLANCES_BASE_URL }/{ endpoint }")
     if response.status_code != 200:
         return None
 
     try:
-        cpu_data = response.json()
+        if plaintext:
+            data = response.text
+        else:
+            data = response.json()
     except:
+        return None
+
+    return data
+
+
+def get_cpu_usage_data() -> dict | None:
+    cpu_data = get_data_from_glances("cpu")
+    if cpu_data is None:
         return None
 
     total_usage = cpu_data["total"]
     core_count = cpu_data["cpucore"]
 
-    response = requests.get(f"{ GLANCES_BASE_URL }/percpu")
-    if response.status_code != 200:
-        return None
-
-    try:
-        percpu_data = response.json()
-    except:
+    percpu_data = get_data_from_glances("percpu")
+    if percpu_data is None:
         return None
 
     percpu_usage = []
@@ -39,14 +46,9 @@ def get_cpu_data() -> dict | None:
     }
 
 
-def get_mem_data() -> dict | None:
-    response = requests.get(f"{ GLANCES_BASE_URL }/mem")
-    if response.status_code != 200:
-        return None
-
-    try:
-        data = response.json()
-    except:
+def get_mem_usage_data() -> dict | None:
+    data = get_data_from_glances("mem")
+    if data is None:
         return None
 
     return {
@@ -57,14 +59,9 @@ def get_mem_data() -> dict | None:
     }
 
 
-def get_network_data() -> dict | None:
-    response = requests.get(f"{ GLANCES_BASE_URL }/network")
-    if response.status_code != 200:
-        return None
-
-    try:
-        data = response.json()
-    except:
+def get_network_usage_data() -> dict | None:
+    data = get_data_from_glances("network")
+    if data is None:
         return None
 
     eth0_data = next((i for i in data if i.get(i.get("key")) == "eth0"), None)
@@ -79,3 +76,32 @@ def get_network_data() -> dict | None:
         "bytes_sent_rate_per_sec": eth0_data["bytes_sent_rate_per_sec"],
         "bytes_recv_rate_per_sec": eth0_data["bytes_recv_rate_per_sec"],
     }
+
+
+def get_cpu_hardware_data():
+    data = get_data_from_glances("core")
+    if data is None:
+        return None
+
+    return {"phys_core_count": data["phys"], "log_core_count": data["log"]}
+
+
+def get_uptime_data():
+    data = get_data_from_glances("uptime", plaintext=True)
+    if data is None:
+        return None
+
+    days = 0
+    hours = 0
+    minutes = 0
+    seconds = 0
+
+    day_match = re.search(r"(\d+)\s+day", data)
+    if day_match:
+        days = int(day_match.group(1))
+
+    time_match = re.search(r"(\d+):(\d+):(\d+)", data)
+    if time_match:
+        hours, minutes, seconds = map(int, time_match.groups())
+
+    return {"days": days, "hours": hours, "minutes": minutes, "seconds": seconds}
