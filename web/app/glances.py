@@ -1,11 +1,18 @@
 import re
 import requests
 
-GLANCES_BASE_URL = "http://127.0.0.1:61208/api/4"
+from app import config
+
+glances_base_url = ""
 
 
 def get_data_from_glances(endpoint: str, plaintext=False):
-    response = requests.get(f"{ GLANCES_BASE_URL }/{ endpoint }")
+    global glances_base_url
+
+    if not glances_base_url:
+        glances_base_url = config.config["glances"]["server_url"]
+
+    response = requests.get(f"{ glances_base_url }/{ endpoint }")
     if response.status_code != 200:
         return None
 
@@ -64,7 +71,14 @@ def get_network_usage_data() -> dict | None:
     if data is None:
         return None
 
-    eth0_data = next((i for i in data if i.get(i.get("key")) == "eth0"), None)
+    eth0_data = next(
+        (
+            i
+            for i in data
+            if i.get(i.get("key")) == config.config["glances"]["phys_na_name"]
+        ),
+        None,
+    )
     if eth0_data is None:
         return None
 

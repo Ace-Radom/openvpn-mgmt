@@ -1,0 +1,6 @@
+[app]
+is_production_env=0
+
+[glances]
+server_url=http://localhost:61208/api/4
+phys_na_name=eth0
