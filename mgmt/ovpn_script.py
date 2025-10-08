@@ -40,6 +40,13 @@ class ovpn_script:
         )
         ovpn_cfg_setup_info = ""
         copied = False
+        if not os.path.exists(script_install_dir):
+            os.makedirs(script_install_dir, 0o755)
+        if not os.path.isdir(script_install_dir):
+            utils.lprint(
+                2, f"Script install dir is not a directory: { script_install_dir }"
+            )
+            return 1
         utils.lprint(1, f"Installing OpenVPN scripts to: { script_install_dir }")
         for script in self._scripts:
             if target != "all" and target != script["script"]:
