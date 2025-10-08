@@ -12,7 +12,10 @@ def get_data_from_glances(endpoint: str, plaintext=False):
     if not glances_base_url:
         glances_base_url = config.config["glances"]["server_url"]
 
-    response = requests.get(f"{ glances_base_url }/{ endpoint }")
+    try:
+        response = requests.get(f"{ glances_base_url }/{ endpoint }")
+    except:
+        return None
     if response.status_code != 200:
         return None
 
