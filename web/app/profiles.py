@@ -15,11 +15,10 @@ def get_hash_worker():
 
 def list_profiles(path: str) -> list:
     profiles = []
-    for files in os.listdir(path):
-        for file in files:
-            filename, ext = os.path.splitext(file)
-            if ext == ".ovpn" and re.match(r"^[A-Z][a-z]*$", filename):
-                profiles.append(file)
+    for file in os.listdir(path):
+        filename, ext = os.path.splitext(file)
+        if ext == ".ovpn" and re.match(r"^[A-Z][a-z]*-[0-9]+$", filename):
+            profiles.append(file)
 
     return profiles
 
@@ -64,11 +63,11 @@ def update_stored_profile_index() -> None:
 
         with open(os.path.join(store_dir, "index.txt"), "w", encoding="utf-8") as file:
             lines = []
-            lines.append(config.config["profiles"]["hash"])
+            lines.append(config.config["profiles"]["hash"] + "\n")
             for index in index_list:
                 filename = index["filename"]
                 hash = index["hash"]
-                lines.append(f"{filename} {hash}")
+                lines.append(f"{filename} {hash}\n")
 
             file.writelines(lines)
 
