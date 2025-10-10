@@ -7,7 +7,7 @@ settings = {
     "base": {
         "output_level": 1,
         "use_mgmt_interface_as_default": False,
-        "base_dir": "/",
+        "base_dir": "/openvpn-mgmt/",
     },
     "server": {
         "service_name": "openvpn-server@server.service",
