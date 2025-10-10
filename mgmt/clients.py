@@ -6,6 +6,7 @@ import datetime
 import json
 import os
 import pexpect
+
 # tbh I don't want to import a 3rd party module
 # but I need to get some sleep... this may be removed
 # after porting some of the functions of `openvpn-install.sh`
@@ -461,12 +462,15 @@ class clients:
         success = False
         while True:
             try:
-                index = proc.expect([
-                    r"Configuration available in",
-                    r"invalid name",
-                    pexpect.EOF,
-                    pexpect.TIMEOUT
-                ], timeout=5)
+                index = proc.expect(
+                    [
+                        r"Configuration available in",
+                        r"invalid name",
+                        pexpect.EOF,
+                        pexpect.TIMEOUT,
+                    ],
+                    timeout=5,
+                )
 
                 if index == 0:
                     success = True
@@ -476,7 +480,9 @@ class clients:
                     success = False
                     break
                 elif index == 2:
-                    utils.lprint(2, "Script `openvpn-install.sh` reached unexpected EOF.")
+                    utils.lprint(
+                        2, "Script `openvpn-install.sh` reached unexpected EOF."
+                    )
                     success = False
                     break
                 # script ended unexpected
@@ -484,7 +490,7 @@ class clients:
                     utils.lprint(2, "Script `openvpn-install.sh` execute timeout.")
                     success = False
                     break
-            
+
             except pexpect.exceptions.EOF:
                 utils.lprint(2, "Script `openvpn-install.sh` reached unexpected EOF.")
                 success = False
@@ -497,7 +503,7 @@ class clients:
 
         if not success:
             return 1
-        
+
         utils.lprint(1, f"Profile { common_name } added, pushing into ipp.txt...")
 
         with open(self._client_ipp_file, "r", encoding="utf-8") as rFile:
@@ -518,7 +524,7 @@ class clients:
 
         utils.lprint(1, f"Refreshing clients data...")
         self.refresh_client_data()
-        
+
         return 0
 
 

@@ -70,10 +70,7 @@ def setup_args():
         help="Refresh valid clients cached datas",
     )
     clients_arg_group.add_argument(
-        "--add",
-        metavar="COMMON_NAME",
-        type=str,
-        help="Add a new client"
+        "--add", metavar="COMMON_NAME", type=str, help="Add a new client"
     )
     clients_arg_group.add_argument(
         "--block",
