@@ -70,6 +70,12 @@ def setup_args():
         help="Refresh valid clients cached datas",
     )
     clients_arg_group.add_argument(
+        "--add",
+        metavar="COMMON_NAME",
+        type=str,
+        help="Add a new client"
+    )
+    clients_arg_group.add_argument(
         "--block",
         nargs=2,
         metavar=tuple(["COMMON_NAME", "BLOCK_TO"]),
@@ -190,6 +196,8 @@ def main():
                     exit(clients_mgmt.block_client(args.block[0], args.block[1]))
                 elif args.is_blocked:
                     exit(clients_mgmt.is_client_blocked(args.is_blocked))
+                elif args.add:
+                    exit(clients_mgmt.add_client(args.add))
 
             if args.subcommand == "connection":
                 connection_mgmt = connection.connection()

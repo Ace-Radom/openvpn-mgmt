@@ -6,6 +6,8 @@ import datetime
 import json
 import os
 import re
+import subprocess
+import __main__
 
 from mgmt import connection
 from mgmt import log
@@ -436,6 +438,75 @@ class clients:
         print(tag)
         print(msg)
         return ret
+
+    def add_client(self, common_name: str) -> int:
+        main_path = __main__.__file__
+        script_path = os.path.join(
+            os.path.dirname(main_path), "third_party/openvpn-install/openvpn-install.sh"
+        )
+        if not os.path.exists(script_path):
+            utils.lprint(2, "Script `openvpn-install.sh` not found.")
+            return 1
+
+        proc = subprocess.Popen(
+            ["bash", script_path],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+
+        option_set = False
+        for line in proc.stdout:
+            if "Option:" in line:
+                proc.stdin.write("1\n")
+                proc.stdin.flush()
+                option_set = True
+                break
+
+        if not option_set:
+            utils.lprint(
+                2, "Error while calling `openvpn-install.sh`: push option failed."
+            )
+            proc.terminate()
+            return 1
+
+        cn_set = False
+        for line in proc.stdout:
+            if "Name:" in line:
+                proc.stdin.write(f"{ common_name }\n")
+                proc.stdin.flush()
+                cn_set = True
+                break
+
+        if not cn_set:
+            utils.lprint(2, "Error while calling `openvpn-install.sh`: push cn failed.")
+            proc.terminate()
+            return 1
+
+        success = False
+        for line in proc.stdout:
+            if "invalid name" in line:
+                utils.lprint(
+                    2, "Error while calling `openvpn-install.sh`: invalid name."
+                )
+                success = False
+                break
+            elif "Configuration available in" in line:
+                success = True
+                break
+
+        if not success:
+            proc.terminate()
+            return 1
+
+        proc.wait()
+        if proc.returncode != 0:
+            utils.lprint(
+                2, f"Script `openvpn-install.sh` exited with code { proc.returncode }."
+            )
+            return 1
 
 
 if __name__ == "__main__":
