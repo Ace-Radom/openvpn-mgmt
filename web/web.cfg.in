@@ -1,5 +1,6 @@
 [app]
 is_production_env=0
+mgmt_path=/openvpn-mgmt/mgmt.py
 
 [profiles]
 generate_dir=/root

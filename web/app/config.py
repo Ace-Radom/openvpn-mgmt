@@ -1,7 +1,7 @@
 import configparser
 
 config = {
-    "app": {"is_production_env": False},
+    "app": {"is_production_env": False, "mgmt_path": "/openvpn-mgmt/mgmt.py"},
     "profiles": {
         "generate_dir": "/root",
         "store_dir": "/var/openvpn-mgmt/profiles",
@@ -25,6 +25,11 @@ def parse_config(config_path: str):
             config["app"]["is_production_env"] = (
                 int(parser["app"]["is_production_env"]) != 0
             )
+        if (
+            parser.has_option("app", "mgmt_path")
+            and len(parser["app"]["mgmt_path"]) != 0
+        ):
+            config["app"]["mgmt_path"] = parser["app"]["mgmt_path"]
 
     if parser.has_section("profiles"):
         if (

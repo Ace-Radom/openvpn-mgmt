@@ -1,14 +1,13 @@
 import hashlib
 import os
 import re
+import subprocess
 import shutil
 import threading
 
 from app import config
-from ...mgmt import clients
 
 lock = threading.RLock()
-clients_mgmt = clients.clients()
 
 
 def get_hash_worker():
@@ -125,7 +124,13 @@ def add_profile(cn: str) -> bool:
     if profile_exists(cn):
         return False
 
-    ret = clients_mgmt.add_client(cn)
+    proc = subprocess.run(
+        ["python3", config.config["app"]["mgmt_path"], "clients", "--add", cn],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    ret = proc.returncode
     if ret != 0:
         return False
 
