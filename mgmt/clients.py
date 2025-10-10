@@ -5,8 +5,12 @@ import csv
 import datetime
 import json
 import os
+import pexpect
+# tbh I don't want to import a 3rd party module
+# but I need to get some sleep... this may be removed
+# after porting some of the functions of `openvpn-install.sh`
+# into python when I have time`
 import re
-import subprocess
 import __main__
 
 from mgmt import connection
@@ -448,65 +452,74 @@ class clients:
             utils.lprint(2, "Script `openvpn-install.sh` not found.")
             return 1
 
-        proc = subprocess.Popen(
-            ["bash", script_path],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-        )
-
-        option_set = False
-        for line in proc.stdout:
-            if "Option:" in line:
-                proc.stdin.write("1\n")
-                proc.stdin.flush()
-                option_set = True
-                break
-
-        if not option_set:
-            utils.lprint(
-                2, "Error while calling `openvpn-install.sh`: push option failed."
-            )
-            proc.terminate()
-            return 1
-
-        cn_set = False
-        for line in proc.stdout:
-            if "Name:" in line:
-                proc.stdin.write(f"{ common_name }\n")
-                proc.stdin.flush()
-                cn_set = True
-                break
-
-        if not cn_set:
-            utils.lprint(2, "Error while calling `openvpn-install.sh`: push cn failed.")
-            proc.terminate()
-            return 1
+        proc = pexpect.spawn(f"bash { script_path }")
+        proc.expect("Option:")
+        proc.sendline("1")
+        proc.expect("Name:")
+        proc.sendline(common_name)
 
         success = False
-        for line in proc.stdout:
-            if "invalid name" in line:
-                utils.lprint(
-                    2, "Error while calling `openvpn-install.sh`: invalid name."
-                )
+        while True:
+            try:
+                index = proc.expect([
+                    r"Configuration available in",
+                    r"invalid name",
+                    pexpect.EOF,
+                    pexpect.TIMEOUT
+                ], timeout=5)
+
+                if index == 0:
+                    success = True
+                    break
+                elif index == 1:
+                    utils.lprint(2, "Script `openvpn-install.sh` failed: invalid name.")
+                    success = False
+                    break
+                elif index == 2:
+                    utils.lprint(2, "Script `openvpn-install.sh` reached unexpected EOF.")
+                    success = False
+                    break
+                # script ended unexpected
+                elif index == 3:
+                    utils.lprint(2, "Script `openvpn-install.sh` execute timeout.")
+                    success = False
+                    break
+            
+            except pexpect.exceptions.EOF:
+                utils.lprint(2, "Script `openvpn-install.sh` reached unexpected EOF.")
                 success = False
-                break
-            elif "Configuration available in" in line:
-                success = True
-                break
+            except pexpect.exceptions.TIMEOUT:
+                utils.lprint(2, "Script `openvpn-install.sh` execute timeout.")
+                success = False
+            finally:
+                if proc.isalive():
+                    proc.terminate()
 
         if not success:
-            proc.terminate()
             return 1
+        
+        utils.lprint(1, f"Profile { common_name } added, pushing into ipp.txt...")
 
-        proc.wait()
-        if proc.returncode != 0:
-            utils.lprint(
-                2, f"Script `openvpn-install.sh` exited with code { proc.returncode }."
-            )
-            return 1
+        with open(self._client_ipp_file, "r", encoding="utf-8") as rFile:
+            ipps = []
+            for row in csv.reader(rFile):
+                ipps.append(row)
+
+        if len(ipps) == 0:
+            new_virtual_ip = "10.8.0.2"
+        else:
+            maxn = max(int(ipp[1].strip().split(".")[3]) for ipp in ipps)
+            new_virtual_ip = f"10.8.0.{ maxn + 1 }"
+
+        utils.lprint(1, f"New profile will have the virtual ip { new_virtual_ip }.")
+
+        with open(self._client_ipp_file, "a", encoding="utf-8") as wFile:
+            wFile.write(f"{common_name},{new_virtual_ip},\n")
+
+        utils.lprint(1, f"Refreshing clients data...")
+        self.refresh_client_data()
+        
+        return 0
 
 
 if __name__ == "__main__":
