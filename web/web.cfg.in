@@ -1,6 +1,11 @@
 [app]
 is_production_env=0
 
+[profiles]
+generate_dir=/root
+store_dir=/var/openvpn-mgmt/profiles
+hash=sha256
+
 [glances]
 server_url=http://localhost:61208/api/4
 phys_na_name=eth0

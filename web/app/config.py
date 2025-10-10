@@ -2,6 +2,11 @@ import configparser
 
 config = {
     "app": {"is_production_env": False},
+    "profiles": {
+        "generate_dir": "/root",
+        "store_dir": "/var/openvpn-mgmt/profiles",
+        "hash": "sha256",
+    },
     "glances": {"server_url": "http://localhost:61208/api/4", "phys_na_name": "eth0"},
 }
 
@@ -19,6 +24,24 @@ def parse_config(config_path: str):
             config["app"]["is_production_env"] = (
                 int(parser["app"]["is_production_env"]) != 0
             )
+
+    if parser.has_section("profiles"):
+        if (
+            parser.has_option("profiles", "generate_dir")
+            and len(parser["profiles"]["generate_dir"]) != 0
+        ):
+            config["profiles"]["generate_dir"] = parser["profiles"]["generate_dir"]
+        if (
+            parser.has_option("profiles", "store_dir")
+            and len(parser["profiles"]["store_dir"]) != 0
+        ):
+            config["profiles"]["store_dir"] = parser["profiles"]["store_dir"]
+        if (
+            parser.has_option("profiles", "hash")
+            and len(parser["profiles"]["hash"]) != 0
+            and parser["profiles"]["hash"] in ["md5", "sha1", "sha256", "sha512"]
+        ):
+            config["profiles"]["hash"] = parser["profiles"]["hash"]
 
     if parser.has_section("glances"):
         if (
