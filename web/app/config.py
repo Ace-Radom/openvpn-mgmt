@@ -6,6 +6,7 @@ config = {
         "generate_dir": "/root",
         "store_dir": "/var/openvpn-mgmt/profiles",
         "hash": "sha256",
+        "max_per_user": 5,
     },
     "glances": {"server_url": "http://localhost:61208/api/4", "phys_na_name": "eth0"},
 }
@@ -42,6 +43,14 @@ def parse_config(config_path: str):
             and parser["profiles"]["hash"] in ["md5", "sha1", "sha256", "sha512"]
         ):
             config["profiles"]["hash"] = parser["profiles"]["hash"]
+        if (
+            parser.has_option("profiles", "max_per_user")
+            and len(parser["profiles"]["max_per_user"]) != 0
+            and parser["profiles"]["max_per_user"].isdigit()
+        ):
+            value = int(parser["profiles"]["max_per_user"])
+            if value > 0:
+                config["profiles"]["max_per_user"] = value
 
     if parser.has_section("glances"):
         if (

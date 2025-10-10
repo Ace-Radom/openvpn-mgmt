@@ -5,8 +5,10 @@ import shutil
 import threading
 
 from app import config
+from ...mgmt import clients
 
 lock = threading.RLock()
+clients_mgmt = clients.clients()
 
 
 def get_hash_worker():
@@ -96,3 +98,36 @@ def sync_profile_store() -> None:
             )
 
         update_stored_profile_index()
+
+
+def count_user_profiles(username: str) -> int:
+    with lock:
+        index = get_stored_profile_index()
+        if index is None:
+            return -1
+
+        profiles = index["profiles"]
+        count = 0
+        for profile in profiles:
+            if username in profile["filename"]:
+                count += 1
+
+        return count
+
+
+def profile_exists(cn: str) -> bool:
+    with lock:
+        return os.path.exists(f"/etc/openvpn/server/easy-rsa/pki/issued/{ cn }.crt")
+    # See: openvpn-install.sh:L451
+
+
+def add_profile(cn: str) -> bool:
+    if profile_exists(cn):
+        return False
+
+    ret = clients_mgmt.add_client(cn)
+    if ret != 0:
+        return False
+
+    sync_profile_store()
+    return True
