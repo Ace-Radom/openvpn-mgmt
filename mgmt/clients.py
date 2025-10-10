@@ -445,9 +445,9 @@ class clients:
         return ret
 
     def add_client(self, common_name: str) -> int:
-        main_path = __main__.__file__
         script_path = os.path.join(
-            os.path.dirname(main_path), "third_party/openvpn-install/openvpn-install.sh"
+            settings.settings["base"]["base_dir"],
+            "third_party/openvpn-install/openvpn-install.sh",
         )
         if not os.path.exists(script_path):
             utils.lprint(2, "Script `openvpn-install.sh` not found.")

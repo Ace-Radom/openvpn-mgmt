@@ -4,7 +4,11 @@
 import configparser
 
 settings = {
-    "base": {"output_level": 1, "use_mgmt_interface_as_default": False},
+    "base": {
+        "output_level": 1,
+        "use_mgmt_interface_as_default": False,
+        "base_dir": "/",
+    },
     "server": {
         "service_name": "openvpn-server@server.service",
         "status_log": "/run/openvpn-server/status-server.log",
@@ -37,6 +41,11 @@ def parse_settings(settings_path: str):
             settings["base"]["use_mgmt_interface_as_default"] = (
                 int(parser["base"]["use_mgmt_interface_as_default"]) != 0
             )
+        if (
+            parser.has_option("base", "base_dir")
+            and len(parser["base"]["base_dir"]) != 0
+        ):
+            settings["base"]["base_dir"] = parser["base"]["base_dir"]
 
     if parser.has_section("server"):
         if (

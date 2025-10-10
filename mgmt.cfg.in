@@ -2,6 +2,7 @@
 output_level=1
 use_mgmt_interface_as_default=0
 parse_service_config=0
+base_dir=/
 
 [server]
 service_name=
