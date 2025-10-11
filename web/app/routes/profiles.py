@@ -1,6 +1,7 @@
+import os
 import re
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, make_response, request, send_file
 
 from app import config, profiles
 
@@ -70,3 +71,26 @@ def profiles_add():
         return jsonify({"success": False, "msg": "Failed to add new profile"}), 500
 
     return jsonify({"success": True})
+
+
+@bp.route("/profiles/download/<common_name>")
+def profiles_download(common_name):
+    if not re.match(r"^[A-Z][a-z]*-[0-9]+$", common_name):
+        return jsonify({"success": False, "msg": "Illegal common_name"}), 400
+    if not profiles.profile_exists(common_name):
+        return jsonify({"success": False, "msg": "Common_name doesn't exist"}), 404
+    
+    profile_path = profiles.get_profile_store_path(common_name)
+    if not os.path.exists(profile_path):
+        return jsonify({"success": False, "msg": "Common_name exists but profile not found"}), 404
+    
+    response = make_response(send_file(
+        profile_path,
+        as_attachment=True,
+        download_name=f"{ common_name }.ovpn",
+        mimetype="application/x-openvpn-profile"
+    ))
+    response.headers["X-Profile-Common-Name"] = common_name
+
+    return response
+

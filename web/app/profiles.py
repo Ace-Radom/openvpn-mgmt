@@ -136,3 +136,7 @@ def add_profile(cn: str) -> bool:
 
     sync_profile_store()
     return True
+
+
+def get_profile_store_path(cn: str) -> str:
+    return os.path.join(config.config["profiles"]["store_dir"], f"{ cn }.ovpn")
