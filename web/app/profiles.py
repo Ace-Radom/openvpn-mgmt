@@ -121,21 +121,22 @@ def profile_exists(cn: str) -> bool:
 
 
 def add_profile(cn: str) -> bool:
-    if profile_exists(cn):
-        return False
+    with lock:
+        if profile_exists(cn):
+            return False
 
-    proc = subprocess.run(
-        ["python3", config.config["app"]["mgmt_path"], "clients", "--add", cn],
-        stdin=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-    )
-    ret = proc.returncode
-    if ret != 0:
-        return False
+        proc = subprocess.run(
+            ["python3", config.config["app"]["mgmt_path"], "clients", "--add", cn],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        ret = proc.returncode
+        if ret != 0:
+            return False
 
-    sync_profile_store()
-    return True
+        sync_profile_store()
+        return True
 
 
 def get_profile_store_path(cn: str) -> str:
