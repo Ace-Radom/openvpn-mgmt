@@ -8,8 +8,8 @@ from app import config, profiles
 bp = Blueprint("profiles", __name__)
 
 
-@bp.route("/profiles/list")
-def profiles_list():
+@bp.route("/profiles/index")
+def profiles_index():
     data = profiles.get_stored_profile_index()
     if data is None:
         return (
@@ -23,7 +23,7 @@ def profiles_list():
 
 
 @bp.route("/profiles/maxperusr")
-def profile_maxperusr():
+def profiles_maxperusr():
     return jsonify(
         {
             "success": True,
@@ -33,7 +33,7 @@ def profile_maxperusr():
 
 
 @bp.route("/profiles/exist", methods=["POST"])
-def profile_exist():
+def profiles_exist():
     data = request.json
     cn = data["common_name"]
     if not cn:
