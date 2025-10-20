@@ -8,6 +8,8 @@ flask = "*"
 requests = "*"
 gunicorn = "*"
 pexpect = "*"
+cryptography = "*"
+redis = "*"
 
 [dev-packages]
 

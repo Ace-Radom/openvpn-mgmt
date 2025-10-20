@@ -2,6 +2,16 @@
 is_production_env=0
 mgmt_path=/openvpn-mgmt/mgmt.py
 
+[challenge]
+pubkey_store_dir=/var/openvpn-mgmt/web/challenge
+index_filename=index.json
+use_pss=1
+hash=sha256
+challenge_str_len=32
+token_len=64
+handshake_timeout_after=60
+token_expire_after=300
+
 [profiles]
 generate_dir=/root
 store_dir=/var/openvpn-mgmt/profiles
@@ -11,3 +21,7 @@ max_per_user=5
 [glances]
 server_url=http://localhost:61208/api/4
 phys_na_name=eth0
+
+[redis]
+key_prefix=openvpn-mgmt-webapi:
+db_url=redis://127.0.0.1:6379
