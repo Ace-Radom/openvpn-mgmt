@@ -55,7 +55,7 @@ def get_hash_func():
 def get_padding_algo():
     if config.config["challenge"]["use_pss"]:
         return padding.PSS(
-            msf=padding.MGF1(get_hash_func()), salt_length=padding.PSS.MAX_LENGTH
+            mgf=padding.MGF1(get_hash_func()), salt_length=padding.PSS.MAX_LENGTH
         )
     else:
         return padding.PKCS1v15()
