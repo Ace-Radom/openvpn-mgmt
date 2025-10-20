@@ -105,7 +105,7 @@ def do_verify(common_name: str, signature: bytes) -> tuple[int, str]:
     if challenge_str is None:
         return 400, "no handshake or timeout"
 
-    pubkey_path = os.path.join(["challenge"]["pubkey_store_dir"], index["common_name"])
+    pubkey_path = os.path.join(config.config["challenge"]["pubkey_store_dir"], index["common_name"])
     if not os.path.exists(pubkey_path):
         return 500, "public key not found"
 
