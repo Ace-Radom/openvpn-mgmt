@@ -103,21 +103,24 @@ def do_verify(common_name: str, signature: bytes) -> tuple[int, str]:
     challenge_key = f"{ prefix }:{ common_name }:challenge-str"
     challenge_str = redis_helper.get(challenge_key)
     if challenge_str is None:
-        return 400, "no handshake or timeout"
+        return 400, "No handshake or timeout"
 
-    pubkey_path = os.path.join(config.config["challenge"]["pubkey_store_dir"], index["common_name"])
+    pubkey_path = os.path.join(config.config["challenge"]["pubkey_store_dir"], index[common_name])
     if not os.path.exists(pubkey_path):
-        return 500, "public key not found"
-
-    with open(pubkey_path, "rb") as file:
-        pubkey = serialization.load_pem_public_key(
-            file.read(), backend=default_backend()
-        )
+        return 500, "Public key not found"
 
     try:
-        pubkey.verify(signature, challenge_str, get_hash_func(), get_hash_func())
+        with open(pubkey_path, "rb") as file:
+            pubkey = serialization.load_pem_public_key(
+                file.read(), backend=default_backend()
+            )
     except:
-        return 403, "failed to verify signature"
+        return 500, "Failed to load public key"
+
+    try:
+        pubkey.verify(signature, challenge_str.encode(encoding="utf-8"), get_hash_func(), get_hash_func())
+    except:
+        return 403, "Failed to verify signature"
 
     token = gen_token()
     token_key = f"{ prefix }:token:{ token }"
@@ -130,7 +133,7 @@ def do_verify(common_name: str, signature: bytes) -> tuple[int, str]:
     if not redis_helper.set(
         token_key, value, config.config["challenge"]["token_expire_after"]
     ):
-        return 500, "redis error"
+        return 500, "Redis error"
     redis_helper.delete(challenge_key)
 
     return 200, token
