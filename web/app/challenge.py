@@ -118,7 +118,7 @@ def do_verify(common_name: str, signature: bytes) -> tuple[int, str]:
         return 500, "Failed to load public key"
 
     try:
-        pubkey.verify(signature, challenge_str.encode(encoding="utf-8"), get_hash_func(), get_hash_func())
+        pubkey.verify(signature, challenge_str.encode(encoding="utf-8"), get_padding_algo(), get_hash_func())
     except:
         return 403, "Failed to verify signature"
 
