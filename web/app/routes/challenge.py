@@ -25,7 +25,7 @@ def challenge_handshake():
                 "challenge_str": msg,
                 "use_pss": config.config["challenge"]["use_pss"],
                 "hash": config.config["challenge"]["hash"],
-                "timeout_after_ts": int(datetime.now().timestamp())
+                "expire_time_ts": int(datetime.now().timestamp())
                 + config.config["challenge"]["handshake_timeout_after"],
             },
         }
@@ -60,7 +60,7 @@ def challenge_verify():
             "success": True,
             "data": {
                 "token": msg,
-                "expired_time_ts": int(datetime.now().timestamp())
+                "expire_time_ts": int(datetime.now().timestamp())
                 + config.config["challenge"]["token_expire_after"],
             },
         }
